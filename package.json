@@ -23,10 +23,17 @@
     "fonts": "startupjs fonts"
   },
   "dependencies": {
+    "@ant-design/react-native": "^4.0.5",
     "@fortawesome/free-solid-svg-icons": "^5.12.0",
     "@startupjs/ui": "^0.26.0",
+    "antd": "^4.7.3",
     "axios": "^0.20.0",
+    "bcrypt": "^5.0.0",
+    "less": "^3.12.2",
+    "less-loader": "^7.0.2",
     "nconf": "^0.10.0",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-native": "0.63.3",

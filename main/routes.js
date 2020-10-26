@@ -5,8 +5,43 @@ export default (components = {}) => [
     component: components.PHome
   },
   {
-    path: '/about',
+    path: '/auth/register',
     exact: true,
-    component: components.PAbout
+    component: components.PRegister
+  },
+  {
+    path: '/auth/login',
+    exact: true,
+    component: components.PLogin
+  },
+  {
+    path: '/game/:gameId',
+    exact: true,
+    component: components.PGame
+  },
+  {
+    path: '/game/:gameId/chronology',
+    exact: true,
+    component: components.PGameChronology
+  },
+  {
+    path: '/library',
+    exact: true,
+    component: components.PLibrary
+  },
+  {
+    path: '/templates/:templateId',
+    exact: true,
+    component: components.PTemplate
+  },
+  {
+    path: '/addTemplate',
+    exact: true,
+    component: components.PTemplate
+  },
+  {
+    path: '/pastgames',
+    exact: true,
+    component: components.PPastGames
   }
 ]
