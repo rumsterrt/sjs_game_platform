@@ -1,40 +1,78 @@
-import React from 'react'
-import { TextInput, Button, Checkbox, Span, Div, Br, Card } from '@startupjs/ui'
-import { useLoader, Logo } from 'components'
-import { observer, emit, useSession, useValue } from 'startupjs'
-import { Input, InputNumber, Text, Select } from 'components/Antd'
-import axios from 'axios'
+import React, { useEffect } from 'react'
+import { Button } from '@startupjs/ui'
+import { observer } from 'startupjs'
+import { Input, Select, Form, Collapse } from 'components/Antd'
+import _update from 'lodash/update'
+import { faTrash, faPlus } from '@fortawesome/free-solid-svg-icons'
+
+import NumberInputSettings from '../NumberInputSettings'
+import SelectInputSettings from '../SelectInputSettings'
+import TextInputSettings from '../TextInputSettings'
+
+import { INPUT_TYPES } from 'main/constants'
+
 import './index.styl'
+
+const inputSettingsRenderMap = {
+  [INPUT_TYPES.TextInput]: TextInputSettings,
+  [INPUT_TYPES.NumberInput]: NumberInputSettings,
+  [INPUT_TYPES.Selector]: SelectInputSettings
+}
 
 const defaultQuestion = {
   role: [],
-  input: 'default',
-  validateTemplate: ''
+  inputType: INPUT_TYPES.TextInput,
+  inputSettings: {}
 }
 
 const QuestionsInput = ({ value = [], onChange, disabled, roles }) => {
-  const [items, $items] = useValue(value.length > 0 ? value : [defaultQuestion])
-
+  useEffect(() => {
+    if (!value || value.length === 0) {
+      onChange([{ ...defaultQuestion }])
+    }
+  }, [])
   const onAdd = () => {
-    $items.set([...items, defaultQuestion])
+    onChange([...value, { ...defaultQuestion }])
   }
 
   const onRemove = (index) => () => {
-    $items.set(items.filter((item, itemIndex) => itemIndex === index))
+    onChange(value.filter((item, itemIndex) => itemIndex !== index))
+  }
+
+  const onChangeItem = (index, path, fieldValue) => {
+    const newValue = [...value]
+    _update(newValue[index], path, () => fieldValue)
+    onChange(newValue)
+  }
+
+  const renderInputSettings = (index, item, value) => {
+    const SettingsRender = inputSettingsRenderMap[item.inputType]
+    return pug`
+      if SettingsRender
+        SettingsRender(value=item.inputSettings onChange=value=>onChangeItem(index, 'inputSettings', value) disabled=disabled)
+    `
+  }
+
+  const getPanelExtra = (index) => {
+    return pug`
+      if value.length > 1
+        Button(variant='text' onClick=onRemove(index) icon=faTrash disabled=disabled)
+    `
   }
 
   return pug`
-    Div.root
-      each item, index in items
-        Card
-          if items.length > 1
-            Button( onClick=onRemove(index) disabled=disabled) Remove
-          Select(mode="multiple" placeholder='Select roles' options=roles value=item.role onChange=value=>$items.set(index+'.role', value) disabled=disabled)
-          Br
-          Select(placeholder='Select Input type' value=item.role onChange=value=>$items.set(index+'.input', value) disabled=disabled)
-          Br
-          Input.TextArea(value=item.validateTemplate name='valRule' placeholder='Enter validate rule' onChange=e=>$items.set(index + '.validateTemplate', e.target.value) disabled=disabled)
-      Button( onClick=onAdd disabled=disabled) Add question
+    Collapse.root
+      each item, index in value
+        Collapse.Panel(key=index header="Question " + (index + 1) extra=getPanelExtra(index))
+          Form.Item(label="Roles")
+            Select(mode="multiple" placeholder='Select roles' options=roles value=item.role onChange=value=>onChangeItem(index, 'role', value) disabled=disabled)
+          Form.Item(label="Message")
+            Input.TextArea(value=item.message name='message' placeholder='Enter message' onChange=e=>onChangeItem(index, 'message', e.target.value) disabled=disabled)
+          Form.Item(label="Input type")
+            Select(placeholder='Select Input type' options=Object.keys(INPUT_TYPES).map(item=>({label:item, value: item})) value=item.inputType onChange=value=>onChangeItem(index, 'inputType', value) disabled=disabled)
+          Form.Item(label="Input settings")
+            = renderInputSettings(index, item, value)
+    Button(variant='text' onClick=onAdd icon=faPlus disabled=disabled)
   `
 }
 

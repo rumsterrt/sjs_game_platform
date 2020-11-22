@@ -1,23 +1,37 @@
 import React from 'react'
-import { observer, emit, useQuery } from 'startupjs'
+import { observer, emit, useQuery, model, useSession } from 'startupjs'
 import { Span, Card, Row, Button } from '@startupjs/ui'
-import { Table } from 'components'
+import { GAME_STATUSES } from 'main/constants'
 import './index.styl'
 
-const LIMIT = 10
-
 const PLibrary = () => {
-  const [templates] = useQuery('templates')
+  const [user] = useSession('user')
+  const [templates] = useQuery('templates', {})
+  const [, $games] = useQuery('games', {})
+
+  const handleCreateGame = (templateId) => () => {
+    const gameId = model.id()
+    $games.add({
+      id: gameId,
+      teacherId: user.id,
+      templateId,
+      playersIds: [],
+      status: GAME_STATUSES.WAIT_PLAYERS
+    })
+    emit('url', '/games/' + gameId)
+  }
 
   return pug`
     Row
       Card.card(onPress=() => emit('url', '/addTemplate'))
         Span Create new template
-      each template in templates.items || []
-        Card(key=template.id)
+      each template in templates || []
+        Card.card(key=template.id)
           Span #{template.name}
           Span #{template.description}
-          Button Create game
+          Button(onPress=handleCreateGame(template.id)) Create game
+          Button(onPress=() => emit('url', '/templates/' + template.id)) 
+            = user.id === template.id ? "Edit template" : "View template"
   `
 }
 

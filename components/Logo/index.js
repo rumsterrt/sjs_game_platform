@@ -2,11 +2,11 @@ import React from 'react'
 import { Div, Span } from '@startupjs/ui'
 import './index.styl'
 
-const Logo = ({ onPress, size = 25 }) => {
+const Logo = ({ onPress, size = 32 }) => {
   return pug`
     Div.root(onClick=() => onPress && onPress())
-      Span.title Game
-      Span.title.bottom Platformer
+      Span.title(style={fontSize:size+'px', lineHeight: size}) Game
+      Span.title.bottom(style={fontSize:size+'px', lineHeight: size}) Platformer
   `
 }
 

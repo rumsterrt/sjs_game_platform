@@ -1,7 +1,21 @@
-import React from 'react'
-import { observer, useLocal, emit } from 'startupjs'
-import { SmartSidebar, Div, Br, Menu } from '@startupjs/ui'
+import React, { useLayoutEffect } from 'react'
+import { observer, useLocal, emit, useValue } from 'startupjs'
+import { Sidebar, DrawerSidebar } from '@startupjs/ui'
+import { Dimensions } from 'react-native'
+import { Menu } from 'components/Antd'
 import './index.styl'
+
+const defaultSidebarProps = {
+  forceClosed: false,
+  position: 'left',
+  width: 264,
+  backgroundColor: 'white'
+}
+
+const isFixedLayout = () => {
+  let dim = Dimensions.get('window')
+  return dim.width > 1024
+}
 
 const menuItems = [
   {
@@ -19,24 +33,40 @@ const menuItems = [
   }
 ]
 
-export default observer(function ({ children }) {
-  const [open, $open] = useLocal('_session.sidebar')
+export default observer(function ({ children, ...props }) {
+  const [$open] = useLocal('_session.sidebar')
   const [{ user }] = useLocal('_session')
+  const [fixedLayout, $fixedLayout] = useValue(isFixedLayout())
+
+  useLayoutEffect(() => {
+    Dimensions.addEventListener('change', handleWidthChange)
+    return () => Dimensions.removeEventListener('change', handleWidthChange)
+  }, [])
+
   const renderSidebar = () => pug`
-    Div
-      Br
-      Menu
-        each item, index in menuItems
-          if !item.onlyTeacher || (item.onlyTeacher && item.isTeacher)
-          Menu.Item(key=index onPress=item.action) #{item.title}
+    Menu(mode="inline" style={height: '100%'})
+      each item, index in menuItems
+        if !item.onlyTeacher || (item.onlyTeacher && user.isTeacher)
+          Menu.Item(key=index onClick=item.action) #{item.title}
   `
 
+  const handleWidthChange = () => {
+    $fixedLayout.setDiff(isFixedLayout())
+  }
+
+  const sidebarPropsConcat = {
+    ...defaultSidebarProps,
+    ...props,
+    defaultOpen: true,
+    $open,
+    renderContent: renderSidebar,
+    contentStyle: { overflow: 'scroll', height: '100%' }
+  }
+  console.log('sidebarPropsConcat', sidebarPropsConcat)
   return pug`
-    SmartSidebar(
-      $open=$open
-      renderContent=renderSidebar
-      fixedLayoutBreakpoint=10000
-    )
-      = children
+    if fixedLayout
+      Sidebar(...sidebarPropsConcat)= children
+    else
+      DrawerSidebar(...sidebarPropsConcat)= children
   `
 })

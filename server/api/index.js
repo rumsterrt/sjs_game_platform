@@ -1,7 +1,6 @@
 import express from 'express'
 import { runHttpHandler } from 'serverHelpers/lifecicle'
 import { register, login } from '../authenticate'
-import passport from 'passport'
 
 const router = express.Router()
 

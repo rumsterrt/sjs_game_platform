@@ -1,10 +1,22 @@
 import React from 'react'
 import { useQuery } from 'startupjs'
 import _isArray from 'lodash/isArray'
+import _get from 'lodash/get'
 
 const getItemsQuery = ({ isAggregate, limit, currentPage, query = {} }) =>
   isAggregate
-    ? { $aggregate: [...(query || []), { $skip: limit * currentPage }, { $limit: limit }] }
+    ? {
+        $aggregate: [
+          ...(query || []),
+          {
+            $addFields: {
+              id: '$_id'
+            }
+          },
+          { $skip: limit * currentPage },
+          { $limit: limit }
+        ]
+      }
     : { ...(query || {}), $limit: limit, $skip: limit * currentPage }
 
 const getTotalQuery = ({ isAggregate, query }) =>
@@ -15,7 +27,7 @@ export default (collection, { query, limit = 10, initPage = 0 }) => {
   const isAggregate = _isArray(query)
   const [data = [], $data] = useQuery(collection, getItemsQuery({ isAggregate, limit, query, currentPage }))
   const [count] = useQuery(collection, getTotalQuery({ isAggregate, query }))
-  const totalCount = (isAggregate ? count[0].totalCount : count) || 0
+  const totalCount = (isAggregate ? _get(count, '[0].totalCount') || 0 : count) || 0
 
   const pagination = {
     page: currentPage,

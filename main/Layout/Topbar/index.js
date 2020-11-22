@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { Menu, Button, Icon, Span, Div, Row } from '@startupjs/ui'
+import { Menu, Icon, Span, Div, Row, Button } from '@startupjs/ui'
 import { observer, useLocal, emit } from 'startupjs'
 import { Logo } from 'components'
 import { logout } from 'clientHelpers'
-import { faArrowDown, faArrowUp, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { faArrowDown, faArrowUp, faSignOutAlt, faBars } from '@fortawesome/free-solid-svg-icons'
 import './index.styl'
 
 const MenuItem = Menu.Item
@@ -25,8 +25,13 @@ const Topbar = () => {
     Div.wrapper
       Div.root
         Div.content
-          Logo(onPress=() => emit('url', '/'))
-          Button(onClick=()=>$openSidebar.set(!openSidebar)) OpenSidebar
+          Row(vAlign='center')
+            Button(
+              onClick=()=>$openSidebar.set(!openSidebar)
+              icon=faBars
+              variant='text'
+            )
+            Logo(onPress=() => emit('url', '/') size=15)
           Button(
             onClick=() => setMenuOpen(!menuOpen)
             icon=menuOpen?faArrowUp:faArrowDown

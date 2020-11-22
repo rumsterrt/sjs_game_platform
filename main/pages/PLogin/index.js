@@ -1,27 +1,23 @@
-import React from 'react'
-import { TextInput, Button, Checkbox, Span, Div, Br } from '@startupjs/ui'
+import React, { useEffect } from 'react'
 import { useLoader, Logo } from 'components'
+import { Div } from '@startupjs/ui'
 import { observer, emit, useSession } from 'startupjs'
 import axios from 'axios'
+import { Form, Input, Button } from 'components/Antd'
 import './index.styl'
 
 const PLogin = () => {
-  const [user, $user] = useSession('user')
-  const [email, setEmail] = React.useState('')
-  const [password, setPassword] = React.useState('')
+  const [user] = useSession('user')
   const [, $topbarProgress] = useLoader()
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) emit('url', '/')
   }, [])
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       $topbarProgress(true)
-      await axios.post('/api/login', {
-        email,
-        password
-      })
+      await axios.post('/api/login', values)
 
       window.location.href += ''
     } catch (err) {
@@ -32,17 +28,19 @@ const PLogin = () => {
   }
 
   return pug`
-    Div.login
+    Div.root
       Logo(size=50)
-      Span Please fill next fields
-      Div.local
-        TextInput(value=email name='email' label='Email' placeholder='Enter email' onChange=e=>setEmail(e.target.value))
-        Br
-        TextInput(value=password label='Password' name='password' placeholder='Enter password' onChange=e=>setPassword(e.target.value))
-        Br
-        Button(type='primary' onClick=onSubmit) Enter
-        Button(type='primary' onClick=() => emit('url', '/auth/register')) Create account
-    `
+      Form(name='login' onFinish=onSubmit layout='vertical')
+        Form.Item(name='email' label='Email' rules=[{ required: true, message: 'Please input your Email!' }])
+          Input(placeholder="Email")
+        Form.Item(name='password' label='Password' rules=[{ required: true, message: 'Please input your Password!' }])
+          Input(type="password" placeholder="Password")
+        Form.Item
+          Button(type='primary' htmlType='submit') Log in
+        Form.Item
+          = 'Or'
+          Button(type='link' onClick=() => emit('url', '/auth/register')) Create account
+  `
 }
 
 export default observer(PLogin)

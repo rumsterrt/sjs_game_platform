@@ -1,28 +1,8 @@
-import passport from 'passport'
-import { Strategy as LocalStrategy } from 'passport-local'
 import bcrypt from 'bcrypt'
 import _get from 'lodash/get'
 
-passport.use(
-  new LocalStrategy(async (email, password, done) => {
-    const $authQuery = model.query('auths', { email })
-    console.log('asdasdaqwew')
-    await $authQuery.fetch()
-    const user = ($authQuery.get() || [])[0]
-    await $authQuery.unfetch()
-    if (!user) {
-      return done(null, false)
-    }
-    const hash = await bcrypt.hash(password, user.salt)
-    if (hash !== user.hash) {
-      return done(null, false)
-    }
-    return done(null, user)
-  })
-)
-
 const validateEmail = (email) => {
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   return re.test(String(email).toLowerCase())
 }
 

@@ -94,8 +94,12 @@ const CustomTable = ({
               Div.headData(key=column.key styleName=[{first: index === 0, last: index === columns.length - 1, expanded: !!expandedRowKeys }])
                 Span.headText #{column.title}
         Div.body
-          each row, index in dataSource
-            =renderRow(row, index)
+          if dataSource.length > 0
+            each row, index in dataSource
+              =renderRow(row, index)
+          else
+            Div.emptyData
+              Span Empty
       =renderPagination()
   `
 }

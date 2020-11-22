@@ -11,7 +11,7 @@ import Sidebar from './Sidebar'
 
 export default observer(function ({ children }) {
   const [{ user }] = useLocal('_session')
-  console.log('isAuth', window.location.href.match(/auth\/.+/))
+
   if (!user) {
     if (window.location.href.match(/auth\/.+/)) {
       return pug`
@@ -25,14 +25,15 @@ export default observer(function ({ children }) {
           PLogin
     `
   }
+
   const main = pug`
     View.layout
       Topbar
-      Sidebar
+      Sidebar.sidebar
         Content(
           padding
           width='full'
-          style={ backgroundColor: 'white' }
+          style={ backgroundColor: 'white'}
         )
           Loader
           Main.content= children
@@ -52,7 +53,7 @@ const Wrapper =
   Platform.OS === 'web'
     ? React.memo(({ children }) => children)
     : React.memo(
-        ({ children }) => pug`
+      ({ children }) => pug`
         SafeAreaView.page(style={ flex: 1, backgroundColor: '#fff' })= children
   `
-      )
+    )

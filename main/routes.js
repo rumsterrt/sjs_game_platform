@@ -15,12 +15,12 @@ export default (components = {}) => [
     component: components.PLogin
   },
   {
-    path: '/game/:gameId',
+    path: '/games/:gameId',
     exact: true,
     component: components.PGame
   },
   {
-    path: '/game/:gameId/chronology',
+    path: '/games/:gameId/chronology',
     exact: true,
     component: components.PGameChronology
   },

@@ -1,31 +1,23 @@
 import React from 'react'
-import { TextInput, Button, Checkbox, Span, Div, Br } from '@startupjs/ui'
+import { Div } from '@startupjs/ui'
 import { useLoader, Logo } from 'components'
 import { observer, emit, useSession } from 'startupjs'
 import axios from 'axios'
+import { Form, Input, Button, Checkbox } from 'components/Antd'
 import './index.styl'
 
 const PRegister = () => {
   const [user, $user] = useSession('user')
-  const [name, setName] = React.useState('')
-  const [email, setEmail] = React.useState('')
-  const [password, setPassword] = React.useState('')
-  const [isTeacher, setIsTeacher] = React.useState(false)
   const [, $topbarProgress] = useLoader()
 
   React.useEffect(() => {
     if (user) emit('url', '/')
   }, [])
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
     try {
       $topbarProgress(true)
-      const { data } = await axios.post('/api/register', {
-        name,
-        email,
-        password,
-        isTeacher
-      })
+      const { data } = await axios.post('/api/register', values)
 
       $user.set(data)
       window.location.href += ''
@@ -37,19 +29,22 @@ const PRegister = () => {
   }
 
   return pug`
-    Div.login
+    Div.root
       Logo(size=50)
-      Span Please fill next fields
-      Div.local
-        TextInput(value=name name='name' label='Name' placeholder='Enter name' onChange=e=>setName(e.target.value))
-        Br
-        TextInput(value=email name='email' label='Email' placeholder='Enter email' onChange=e=>setEmail(e.target.value))
-        Br
-        TextInput(value=password label='Password' name='password' placeholder='Enter password' onChange=e=>setPassword(e.target.value))
-        Br
-        Checkbox(value=isTeacher name='isTeacher' onChange=setIsTeacher label="I'm teacher")
-        Br
-        Button(type='primary' onClick=onSubmit) Enter
+      Form(name='login' onFinish=onSubmit layout='vertical')
+        Form.Item(name='name' label='Name' rules=[{ required: true, message: 'Please input your Name!' }])
+          Input(placeholder="Name")
+        Form.Item(name='email' label='Email' rules=[{ required: true, message: 'Please input your Email!' }])
+          Input(placeholder="Email")
+        Form.Item(name='password' label='Password' rules=[{ required: true, message: 'Please input your Password!' }])
+          Input(type="password" placeholder="Password")
+        Form.Item(name='isTeacher' valuePropName="checked")
+          Checkbox I'm teacher
+        Form.Item
+          Button(type='primary' htmlType='submit') Register
+        Form.Item
+          = 'Or'
+          Button(type='link' onClick=() => emit('url', '/auth/login')) Login
     `
 }
 
