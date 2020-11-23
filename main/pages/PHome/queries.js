@@ -17,7 +17,7 @@ export const teacherGames = (teacherId) => ({
       }
     },
     { $unwind: { path: '$template' } },
-    { $sort: { playersIds: -1, createdAt: -1 } }
+    { $sort: { playerIds: -1, createdAt: -1 } }
   ]
 })
 
@@ -28,7 +28,7 @@ export const playerGames = (playerId) => ({
         $or: [
           {
             status: { $ne: GAME_STATUSES.FINISHED },
-            playersIds: { $in: [playerId] }
+            playerIds: { $in: [playerId] }
           },
           {
             status: GAME_STATUSES.WAIT_PLAYERS
@@ -55,7 +55,7 @@ export const playerGames = (playerId) => ({
     },
     { $unwind: { path: '$teacher' } },
     {
-      $sort: { playersIds: -1 }
+      $sort: { playerIds: -1 }
     }
   ]
 })

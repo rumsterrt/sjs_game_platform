@@ -16,10 +16,10 @@ export default withRouter(
       query: { gameId }
     })
     const [players] = useQueryTable('users', {
-      query: { _id: { $in: game.playersIds } }
+      query: { _id: { $in: game.playerIds } }
     })
 
-    console.log('players', players, game.playersIds)
+    console.log('players', players, game.playerIds)
 
     const columnsGroups = [
       {

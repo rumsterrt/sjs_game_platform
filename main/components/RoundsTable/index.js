@@ -27,12 +27,12 @@ const RoundsTable = (props) => {
   })
 
   const [players = []] = useQuery('users', {
-    _id: { $in: game.playersIds }
+    _id: { $in: game.playerIds }
   })
   if (!gameId) {
     return null
   }
-  if (game.playersIds.length < 2) {
+  if (game.playerIds.length < 2) {
     return pug`Span Waiting for players`
   }
 

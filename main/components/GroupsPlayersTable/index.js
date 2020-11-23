@@ -7,7 +7,7 @@ const GroupsPlayersTable = ({ gameId, onlyUserGroup = false }) => {
   const [user = {}] = useSession('user')
   const [game = {}] = useDoc('games', gameId)
   const [players] = useQuery('users', {
-    _id: { $in: game.playersIds }
+    _id: { $in: game.playerIds }
   })
   const groupFilter = onlyUserGroup ? { [`players.${user.id}`]: { $exists: true } } : {}
   const [gameGroups = []] = useQuery('gameGroups', {

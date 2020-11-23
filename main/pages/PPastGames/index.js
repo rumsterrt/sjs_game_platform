@@ -9,7 +9,7 @@ import './index.styl'
 
 const PPastGames = () => {
   const [user] = useSession('user')
-  const search = user.isTeacher ? { teacherId: { $in: [user.id] } } : { playersIds: { $in: [user.id] } }
+  const search = user.isTeacher ? { teacherId: { $in: [user.id] } } : { playerIds: { $in: [user.id] } }
   const [games = {}] = useQueryTable('games', {
     query: [
       {
@@ -35,12 +35,12 @@ const PPastGames = () => {
       {
         $lookup: {
           from: 'users',
-          let: { playersIds: '$playersIds' },
+          let: { playerIds: '$playerIds' },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $in: ['$_id', '$$playersIds']
+                  $in: ['$_id', '$$playerIds']
                 }
               }
             }
@@ -99,8 +99,8 @@ const PPastGames = () => {
       title: 'Player1',
       key: 'player1',
       render: (data) => {
-        const info = data.round.players[data.playersIds[0]]
-        const player = data.players.find((item) => item._id === data.playersIds[0]) || {}
+        const info = data.round.players[data.playerIds[0]]
+        const player = data.players.find((item) => item._id === data.playerIds[0]) || {}
         return pug`
           Span.line.text #{player.name}
           Span.line.text #{info.points}
@@ -111,8 +111,8 @@ const PPastGames = () => {
       title: 'Player2',
       key: 'player2',
       render: (data) => {
-        const info = data.round.players[data.playersIds[1]]
-        const player = data.players.find((item) => item._id === data.playersIds[1]) || {}
+        const info = data.round.players[data.playerIds[1]]
+        const player = data.players.find((item) => item._id === data.playerIds[1]) || {}
         return pug`
           Span.line.text #{player.name}
           Span.line.text #{info.points}

@@ -37,23 +37,23 @@ export default observer(() => {
       title: 'Players count',
       key: 'playersCount',
       render: (data) => pug`
-        Span #{data.playersIds.length}
+        Span #{data.playerIds.length}
       `
     },
     {
       title: '',
       key: 'join',
       render: (data) => pug`
-        Button(onClick=()=>handleJoinGame(data)) #{data.playersIds.includes(user.id)? 'BACK' : 'JOIN'}
+        Button(onClick=()=>handleJoinGame(data)) #{data.playerIds.includes(user.id)? 'BACK' : 'JOIN'}
       `
     }
   ]
 
   const handleJoinGame = (game) => {
     console.log('game', game)
-    if (!game.playersIds.includes(user.id)) {
+    if (!game.playerIds.includes(user.id)) {
       $games.at(game.id).setEach({
-        playersIds: [...game.playersIds, user.id]
+        playerIds: [...game.playerIds, user.id]
       })
     }
     emit('url', '/games/' + game.id)

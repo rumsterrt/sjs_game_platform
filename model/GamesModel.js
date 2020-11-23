@@ -15,14 +15,14 @@ export default class GamesModel extends BaseModel {
     const template = $template.get()
     await $template.unfetch()
 
-    if (game.status !== 'wait_players' || game.playersIds.length < template.roles) {
+    if (game.status !== 'wait_players' || game.playerIds.length < template.roles) {
       return
     }
     const rolesCount = template.roles.length
-    const groupsCount = Math.floor(game.playersIds.length / rolesCount)
+    const groupsCount = Math.floor(game.playerIds.length / rolesCount)
 
     new Array(groupsCount).fill().forEach((_, index) => {
-      const players = game.playersIds
+      const players = game.playerIds
         .slice(index * rolesCount, rolesCount)
         .reduce((acc, item, index) => ({ ...acc, [item]: template.roles[index] }), {})
       console.log('players', players)
@@ -35,7 +35,7 @@ export default class GamesModel extends BaseModel {
         answers: {}
       })
     })
-    $game.setEach({ playersIds: game.playersIds.slice(0, groupsCount * rolesCount), status: 'wait_start' })
+    $game.setEach({ playerIds: game.playerIds.slice(0, groupsCount * rolesCount), status: 'wait_start' })
   }
 
   responseByPlayer = async (playerId, response) => {

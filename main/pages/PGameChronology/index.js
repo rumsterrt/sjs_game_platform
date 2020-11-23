@@ -12,13 +12,13 @@ export default withRouter(
     const [game] = useDoc('games', gameId)
 
     useEffect(() => {
-      if (!user || !game || user.id === game.teacherId || game.playersIds.includes(user.id)) {
+      if (!user || !game || user.id === game.teacherId || game.playerIds.includes(user.id)) {
         return
       }
       emit('url', '/')
     }, [user, game])
 
-    if (game.playersIds.length < 2) {
+    if (game.playerIds.length < 2) {
       return pug`Span Waiting for players`
     }
 

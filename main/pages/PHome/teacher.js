@@ -31,7 +31,7 @@ export default observer(() => {
       title: 'Players count',
       key: 'playersCount',
       render: (data) => pug`
-        Span.line.text #{_get(data,'playersIds.length', 0)}
+        Span.line.text #{_get(data,'playerIds.length', 0)}
       `
     },
     {

@@ -15,7 +15,7 @@ const PLibrary = () => {
       id: gameId,
       teacherId: user.id,
       templateId,
-      playersIds: [],
+      playerIds: [],
       status: GAME_STATUSES.WAIT_PLAYERS
     })
     emit('url', '/games/' + gameId)
