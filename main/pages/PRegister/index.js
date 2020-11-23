@@ -31,7 +31,7 @@ const PRegister = () => {
   return pug`
     Div.root
       Logo(size=50)
-      Form(name='login' onFinish=onSubmit layout='vertical')
+      Form(name='register' onFinish=onSubmit layout='vertical')
         Form.Item(name='name' label='Name' rules=[{ required: true, message: 'Please input your Name!' }])
           Input(placeholder="Name")
         Form.Item(name='email' label='Email' rules=[{ required: true, message: 'Please input your Email!' }])
