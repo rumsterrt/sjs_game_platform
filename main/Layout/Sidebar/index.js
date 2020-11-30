@@ -62,7 +62,7 @@ export default observer(function ({ children, ...props }) {
     renderContent: renderSidebar,
     contentStyle: { overflow: 'scroll', height: '100%' }
   }
-  console.log('sidebarPropsConcat', sidebarPropsConcat)
+
   return pug`
     if fixedLayout
       Sidebar(...sidebarPropsConcat)= children

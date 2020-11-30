@@ -13,7 +13,7 @@ const defaultInit = {
   questions: []
 }
 
-const TemplateForm = ({ templateId }) => {
+const TemplateForm = ({ templateId, onSubmit }) => {
   const [user = {}] = useSession('user')
   const [localValues, setLocalValues] = useState({})
   const [template = {}] = useDoc('templates', templateId)
@@ -24,7 +24,6 @@ const TemplateForm = ({ templateId }) => {
   }, [JSON.stringify(template)])
 
   const onFinish = async (values) => {
-    console.log('values', values)
     if (templateId) {
       $templates.at(templateId).setEach({
         ...values
@@ -39,6 +38,7 @@ const TemplateForm = ({ templateId }) => {
     notification.info({
       message: templateId ? 'Template was updated' : 'Template was created'
     })
+    onSubmit && onSubmit()
   }
   const onValuesChange = (values) => setLocalValues({ ...localValues, ...values })
 

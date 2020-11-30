@@ -1,5 +1,5 @@
 import React from 'react'
-import { observer, useDoc } from 'startupjs'
+import { observer, useDoc, emit } from 'startupjs'
 import { H3 } from '@startupjs/ui'
 import { withRouter } from 'react-router-native'
 import TemplateForm from 'main/components/TemplateForm'
@@ -11,7 +11,7 @@ const PLibrary = ({ location, match }) => {
 
   return pug`
     H3.centerText #{template.name || "New template"}
-    TemplateForm(templateId=templateId initValues=template)
+    TemplateForm(templateId=templateId initValues=template onSubmit=() => emit('url', '/library'))
   `
 }
 

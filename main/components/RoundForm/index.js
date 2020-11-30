@@ -1,10 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { observer, useSession, useDoc } from 'startupjs'
 import { Input, InputNumber, Text, Select, Form, Button } from 'components/Antd'
+import { H4 } from '@startupjs/ui'
 import { INPUT_TYPES } from 'main/constants'
+import _get from 'lodash/get'
 import './index.styl'
 
 const RoundForm = ({ gameGroupId }) => {
+  const [form] = Form.useForm()
   const [user = {}] = useSession('user')
   const [gameGroup = {}, $gameGroup] = useDoc('gameGroups', gameGroupId)
   const [game = {}, $game] = useDoc('games', gameGroup.gameId)
@@ -18,7 +21,10 @@ const RoundForm = ({ gameGroupId }) => {
       return
     }
     setCurrentRound(await $gameGroup.getCurrentRound())
+    form.resetFields()
   }
+
+  useEffect(getCurrentRound, [gameGroup.currentRound])
 
   if (!game || !gameGroup) {
     return pug`
@@ -52,16 +58,20 @@ const RoundForm = ({ gameGroupId }) => {
   }
 
   const handleBackToEdit = async () => {}
-  console.log('asdasd', { template, game, currentRound, gameGroup })
+
   const questions = template.questions || []
   const { submit } = (currentRound && currentRound.answers[user.id]) || { response: [], submit: false }
+  const roundIndex = _get(currentRound, 'roundIndex', 0) + 1
+  console.log('roundIndex', { roundIndex, currentRound })
 
   return pug`
+    H4 Round #{roundIndex}
     if !submit
       Form.root(
-      name='RoundForm'
-      onFinish=onFinish
-      layout="vertical"
+        form=form
+        name='RoundForm'
+        onFinish=onFinish
+        layout="vertical"
       )
         each question, index in questions
           = renderField(['questions',index], question)

@@ -1,74 +1,18 @@
 import React from 'react'
-import { observer, useSession, useValue } from 'startupjs'
+import { observer, useSession } from 'startupjs'
 import { Div, Span } from '@startupjs/ui'
 import { Table } from 'components'
-import RoundsTable from 'main/components/RoundsTable'
+import GroupsTable from 'main/components/GroupsTable'
 import moment from 'moment'
 import { useQueryTable } from 'main/hooks'
+import { playerGames, teacherGames } from './queries'
+import _get from 'lodash/get'
 import './index.styl'
 
 const PPastGames = () => {
   const [user] = useSession('user')
-  const search = user.isTeacher ? { teacherId: { $in: [user.id] } } : { playerIds: { $in: [user.id] } }
-  const [games = {}] = useQueryTable('games', {
-    query: [
-      {
-        $match: { isFinished: true, ...search }
-      },
-      {
-        $lookup: {
-          from: 'rounds',
-          let: { lastIndex: '$lastFinishedRoundIndex', gameId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [{ $eq: ['$$lastIndex', '$gameIndex'] }, { $eq: ['$$gameId', '$gameId'] }]
-                }
-              }
-            }
-          ],
-          as: 'round'
-        }
-      },
-      { $unwind: { path: '$round', preserveNullAndEmptyArrays: true } },
-      {
-        $lookup: {
-          from: 'users',
-          let: { playerIds: '$playerIds' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $in: ['$_id', '$$playerIds']
-                }
-              }
-            }
-          ],
-          as: 'players'
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          let: { teacherId: '$teacherId' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$_id', '$$teacherId']
-                }
-              }
-            }
-          ],
-          as: 'teacher'
-        }
-      },
-      { $unwind: { path: '$teacher', preserveNullAndEmptyArrays: true } }
-    ]
-  })
-  const [expandedGameId, $expandedGameId] = useValue()
-
+  const [games = {}] = useQueryTable('games', user.isTeacher ? teacherGames(user.id) : playerGames(user.id))
+  console.log('games', { games })
   const columns = [
     {
       title: 'Name',
@@ -76,7 +20,7 @@ const PPastGames = () => {
 
       ellipsis: true,
       render: (data) => pug`
-        Span.line.text #{data.name}
+        Span.line.text #{_get(data,'template.name')}
       `
     },
     {
@@ -85,49 +29,29 @@ const PPastGames = () => {
 
       ellipsis: true,
       render: (data) => pug`
-        Span.line.text #{data.teacher.name}
+        Span.line.text #{user.isTeacher ? user.name : _get(data,'teacher.name')}
+      `
+    },
+    {
+      title: 'Rounds',
+      key: 'rounds',
+      render: (data) => pug`
+        Span.line.text #{_get(data,'template.rounds')}
       `
     },
     {
       title: 'Created At',
-      key: 'age',
+      key: 'createdAt',
       render: (data) => pug`
         Span.text #{moment(data.createdAt).format('MM/DD/YYYY')}
       `
-    },
-    {
-      title: 'Player1',
-      key: 'player1',
-      render: (data) => {
-        const info = data.round.players[data.playerIds[0]]
-        const player = data.players.find((item) => item._id === data.playerIds[0]) || {}
-        return pug`
-          Span.line.text #{player.name}
-          Span.line.text #{info.points}
-        `
-      }
-    },
-    {
-      title: 'Player2',
-      key: 'player2',
-      render: (data) => {
-        const info = data.round.players[data.playerIds[1]]
-        const player = data.players.find((item) => item._id === data.playerIds[1]) || {}
-        return pug`
-          Span.line.text #{player.name}
-          Span.line.text #{info.points}
-        `
-      }
     }
   ]
 
-  const rowExpandRender = (record) => pug`
-    if expandedGameId
-      RoundsTable(gameId=expandedGameId)
-  `
-
-  const handleExpand = (expanded, record) => {
-    $expandedGameId.set(expanded ? record._id : null)
+  const rowExpandRender = (record) => {
+    return pug`
+      GroupsTable(gameId=record.id)
+    `
   }
 
   return pug`
@@ -139,9 +63,7 @@ const PPastGames = () => {
             dataSource=games.items
             pagination=games.pagination
             columns=columns
-            rowKey=item => item._id
-            expandedRowKeys=expandedGameId?[expandedGameId]:[]
-            onExpand=handleExpand
+            rowKey=item => item.id
             expandedRowRender=rowExpandRender
           )
   `

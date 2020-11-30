@@ -15,7 +15,7 @@ const GroupsPlayersTable = ({ gameId, onlyUserGroup = false }) => {
     ...groupFilter
   })
   const [tableData = [], setTableData] = useState([])
-  console.log('tableData', tableData)
+
   useEffect(() => {
     if (players.length === 0) {
       return
@@ -25,10 +25,11 @@ const GroupsPlayersTable = ({ gameId, onlyUserGroup = false }) => {
         ...rest,
         players: Object.keys(groupPlayers).reduce((acc, playerId) => {
           const player = players.find((item) => item.id === playerId)
+
           if (!player) {
             return acc
           }
-          console.log('player', { player, players, playerId, game })
+
           return [...acc, { name: player.name, id: playerId, role: groupPlayers[playerId] }]
         }, [])
       }
@@ -54,8 +55,6 @@ const GroupsPlayersTable = ({ gameId, onlyUserGroup = false }) => {
       }
     }
   ]
-
-  console.log('tableData', { tableData, gameGroups })
 
   return pug`
     Div.root

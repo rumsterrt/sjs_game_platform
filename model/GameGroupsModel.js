@@ -1,41 +1,23 @@
 import { BaseModel } from 'startupjs/orm'
 import _toPairs from 'lodash/toPairs'
 import _template from 'lodash/template'
+import _get from 'lodash/get'
 
 export default class GameGroupsModel extends BaseModel {
   getCurrentRound = async () => {
     const { id: gameGroupId } = this.get()
-    const model = this.root
 
     const $rounds = this.query('rounds', { gameGroupId })
     await $rounds.fetch()
     const rounds = $rounds.get()
     await $rounds.unfetch()
 
-    let roundId, roundData
+    const $gameGroup = this.scope(`gameGroups.${gameGroupId}`)
+    await $gameGroup.fetch()
+    const gameGroup = $gameGroup.get()
+    await $gameGroup.unfetch()
 
-    // Game just started
-    console.log('rounds', rounds)
-    if (rounds.length === 0) {
-      roundId = model.id()
-      roundData = {
-        id: roundId,
-        gameGroupId,
-        roundIndex: 0,
-        answers: {}
-      }
-      model.add('rounds', roundData)
-    } else {
-      const $gameGroup = this.scope(`gameGroups.${gameGroupId}`)
-      await $gameGroup.fetch()
-      const gameGroup = $gameGroup.get()
-      await $gameGroup.unfetch()
-      console.log('rounds', rounds)
-      roundData = rounds.find((item) => item.roundIndex === gameGroup.currentRound)
-      roundId = roundData.id
-    }
-
-    return roundData
+    return rounds.find(({ roundIndex }) => roundIndex === gameGroup.currentRound)
   }
 
   responseRound = async (playerId, response) => {
@@ -57,9 +39,8 @@ export default class GameGroupsModel extends BaseModel {
         submit: true
       }
     }
-    console.log('$round', { $round, round })
+
     $round.setEach({ answers: newAnswers })
-    await $round.fetch()
 
     // Everybody responded
     if (Object.keys(newAnswers).length !== Object.keys(gameGroup.players).length) {
@@ -75,27 +56,47 @@ export default class GameGroupsModel extends BaseModel {
     const template = $template.get()
     await $template.unfetch()
 
-    // TODO: calc results
+    // Calc scores
     const compiled = _template(`(() => {${template.scoreCalc}})()`)
     const args = _toPairs(gameGroup.players).reduce((acc, item) => {
       return { ...acc, [item[1]]: { response: newAnswers[item[0]].response.map((ans) => `\`${ans}\``) } }
     }, {})
 
-    // eslint-disable-next-line no-eval
-    $round.setEach({ winner: eval(compiled(args)) })
+    // Get previous round to calc total score in round
+    const $prevRound = this.query('rounds', { gameGroupId, roundIndex: round.roundIndex - 1 })
+    await $prevRound.fetch()
+    const prevTotalScores = _get($prevRound.get()[0], 'totalScores') || {}
+    await $prevRound.unfetch()
+
+    const scoreInfos = _toPairs(gameGroup.players).reduce(
+      (acc, item) => {
+        // eslint-disable-next-line no-eval
+        const roundScore = eval(compiled({ ...args, currentRole: `\`${item[1]}\`` }))
+        const totalScore = roundScore + (prevTotalScores[item[0]] || 0)
+
+        return {
+          scores: { ...acc.scores, [item[0]]: roundScore },
+          totalScores: { ...acc.totalScores, [item[0]]: totalScore }
+        }
+      },
+      { scores: {}, totalScores: {} }
+    )
+    console.log('scoreInfos', { scoreInfos })
+    $round.setEach(scoreInfos)
 
     if (round.roundIndex + 1 === template.rounds) {
       $gameGroup.setEach({ status: 'finished' })
-      return
+    } else {
+      // Add new round, if we can
+      await model.add('rounds', {
+        id: model.id(),
+        gameGroupId,
+        roundIndex: round.roundIndex + 1,
+        answers: {}
+      })
+      $gameGroup.setEach({ currentRound: round.roundIndex + 1 })
     }
 
-    // Add new round, if we can
-    model.add('rounds', {
-      id: model.id(),
-      gameGroupId,
-      roundIndex: round.roundIndex + 1,
-      answers: {}
-    })
-    $gameGroup.setEach({ currentRound: round.roundIndex + 1 })
+    await $round.unfetch()
   }
 }

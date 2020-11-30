@@ -1,6 +1,6 @@
 import React from 'react'
 import { observer, emit, useQuery, model, useSession } from 'startupjs'
-import { Span, Card, Row, Button } from '@startupjs/ui'
+import { Span, Card, Div, Button } from '@startupjs/ui'
 import { GAME_STATUSES } from 'main/constants'
 import './index.styl'
 
@@ -22,7 +22,7 @@ const PLibrary = () => {
   }
 
   return pug`
-    Row
+    Div.root
       Card.card(onPress=() => emit('url', '/addTemplate'))
         Span Create new template
       each template in templates || []

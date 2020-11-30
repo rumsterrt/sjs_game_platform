@@ -5,7 +5,7 @@ export const teacherGames = (teacherId) => ({
     {
       $match: {
         teacherId: { $in: [teacherId] },
-        status: { $ne: GAME_STATUSES.FINISHED }
+        status: GAME_STATUSES.FINISHED
       }
     },
     {
@@ -25,15 +25,8 @@ export const playerGames = (playerId) => ({
   query: [
     {
       $match: {
-        $or: [
-          {
-            status: { $ne: GAME_STATUSES.FINISHED },
-            playerIds: { $in: [playerId] }
-          },
-          {
-            status: GAME_STATUSES.WAIT_PLAYERS
-          }
-        ]
+        status: GAME_STATUSES.FINISHED,
+        playerIds: { $in: [playerId] }
       }
     },
     {

@@ -25,13 +25,19 @@ export default class GamesModel extends BaseModel {
       const players = game.playerIds
         .slice(index * rolesCount, rolesCount)
         .reduce((acc, item, index) => ({ ...acc, [item]: template.roles[index] }), {})
-      console.log('players', players)
-      model.addAsync('gameGroups', {
-        id: model.id(),
+      const gameGroupId = model.id()
+      model.add('gameGroups', {
+        id: gameGroupId,
         gameId,
         players,
         currentRound: 0,
         status: 'processing',
+        answers: {}
+      })
+      model.add('rounds', {
+        id: model.id(),
+        gameGroupId,
+        roundIndex: 0,
         answers: {}
       })
     })
@@ -49,7 +55,7 @@ export default class GamesModel extends BaseModel {
     const $playerGroup = this.scope(`gameGroups.${playerGroup.id}`)
 
     await $playerGroup.responseRound(playerId, response)
-    console.log('gameGroups', $gameGroups.get())
+
     if ($gameGroups.get().every((item) => item.status === 'finished')) {
       $game.setEach({ status: 'finished' })
     }

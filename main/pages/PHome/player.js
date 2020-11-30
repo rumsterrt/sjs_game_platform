@@ -1,5 +1,5 @@
 import React from 'react'
-import { observer, useSession, emit } from 'startupjs'
+import { observer, useSession, emit, model } from 'startupjs'
 import { Span, Button } from '@startupjs/ui'
 import { Table } from 'components'
 import { useQueryTable } from 'main/hooks'
@@ -9,7 +9,7 @@ import './index.styl'
 
 export default observer(() => {
   const [user] = useSession('user')
-  const [games = {}, $games] = useQueryTable('games', playerGames(user.id))
+  const [games = {}] = useQueryTable('games', playerGames(user.id))
 
   const columns = [
     {
@@ -49,12 +49,10 @@ export default observer(() => {
     }
   ]
 
-  const handleJoinGame = (game) => {
-    console.log('game', game)
+  const handleJoinGame = async (game) => {
     if (!game.playerIds.includes(user.id)) {
-      $games.at(game.id).setEach({
-        playerIds: [...game.playerIds, user.id]
-      })
+      await model.fetch(`games.${game.id}`)
+      await model.push(`games.${game.id}.playerIds`, user.id)
     }
     emit('url', '/games/' + game.id)
   }

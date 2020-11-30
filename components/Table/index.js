@@ -10,7 +10,7 @@ const CustomTable = ({
   dataSource,
   columns,
   onExpand,
-  expandedRowKeys,
+  expandAll,
   expandedRowRender,
   rowKey,
   title,
@@ -18,12 +18,21 @@ const CustomTable = ({
   ...props
 }) => {
   const [columnMap, setColumnMap] = useState({})
+  const [expandedGameId, setExpandedGameId] = useState()
   useEffect(() => {
     if (!columns) {
       return
     }
     setColumnMap(columns.reduce((acc, item) => ({ ...acc, [item.key]: item }), {}))
   }, [JSON.stringify(columns)])
+
+  const handleExpand = (expanded, record) => {
+    if (expandAll) {
+      return
+    }
+    setExpandedGameId(expanded ? record.id : null)
+    onExpand && onExpand(expanded, record)
+  }
 
   const renderPagination = () => {
     if (!pagination) {
@@ -42,14 +51,15 @@ const CustomTable = ({
   }
 
   const renderRow = (row, index) => {
-    if (expandedRowKeys) {
-      const isOpen = expandedRowKeys.includes(rowKey(row))
+    if (expandedRowRender) {
+      const isOpen = expandAll || expandedGameId === rowKey(row)
+      console.log('isOpen', { isOpen, row, expandedGameId, title })
 
       return pug`
         Collapse.collapse(
             key=index
             open=isOpen
-            onChange=() => onExpand(!isOpen, row)
+            onChange=() => handleExpand(!isOpen, row)
             styleName=[{[colorScheme]: true, odd: index%2 > 0}]
             variant='pure'
           )
@@ -91,7 +101,7 @@ const CustomTable = ({
         Div.head
           Row.row.head(styleName=[{[colorScheme]: true}])
             each column, index in columns
-              Div.headData(key=column.key styleName=[{first: index === 0, last: index === columns.length - 1, expanded: !!expandedRowKeys }])
+              Div.headData(key=column.key styleName=[{first: index === 0, last: index === columns.length - 1, expanded: !!expandedGameId }])
                 Span.headText #{column.title}
         Div.body
           if dataSource.length > 0

@@ -1,102 +1,111 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { observer, useDoc, useQuery } from 'startupjs'
-import { Icon, Span } from '@startupjs/ui'
+import { Span } from '@startupjs/ui'
 import { Table } from 'components'
 import { useQueryTable } from 'main/hooks'
-import { faHandPaper, faHandRock, faHandScissors, faFlag } from '@fortawesome/free-solid-svg-icons'
 import _get from 'lodash/get'
 
 import './index.styl'
 
-const iconResponseMap = {
-  rock: faHandRock,
-  scissors: faHandScissors,
-  paper: faHandPaper,
-  pass: faFlag
-}
-
-const RoundsTable = (props) => {
-  const gameId = props.gameId
-  const [game = {}] = useDoc('games', gameId)
-  const roundQuery = { gameId, $sort: { gameIndex: props.fromLast ? -1 : 1 } }
-  if (!props.includeCurrent) {
-    roundQuery.winnerId = { $ne: null }
+const RoundsTable = ({ gameGroupId, gameId, includeCurrent, fromLast }) => {
+  const [dataSource, setDataSource] = useState([])
+  const [gameGroup = {}] = useDoc('gameGroups', gameGroupId)
+  const roundQuery = { gameGroupId, $sort: { roundIndex: fromLast ? -1 : 1 } }
+  if (!includeCurrent) {
+    roundQuery.scores = { $ne: null }
   }
   const [rounds = []] = useQueryTable('rounds', {
     query: roundQuery
   })
 
   const [players = []] = useQuery('users', {
-    _id: { $in: game.playerIds }
+    _id: { $in: Object.keys(gameGroup.players || {}) }
   })
+
+  useEffect(() => {
+    const preparedRounds = rounds.items.map((item) => ({
+      ...item,
+      players: players.map((player) => ({
+        ...player,
+        role: gameGroup.players[player.id],
+        answers: _get(item, `answers.${player.id}.response`),
+        score: item.scores[player.id],
+        totalScore: item.totalScores[player.id]
+      }))
+    }))
+    setDataSource(preparedRounds)
+  }, [JSON.stringify(players), JSON.stringify(rounds.items), JSON.stringify(gameGroup)])
+
   if (!gameId) {
     return null
   }
-  if (game.playerIds.length < 2) {
-    return pug`Span Waiting for players`
-  }
 
-  const renderResponse = (response) => {
-    if (!response || !iconResponseMap[response]) {
-      return
-    }
-
-    return pug`Icon(icon=iconResponseMap[response] size=15)`
-  }
-
-  const columns = [
+  const roundColumns = [
     {
       title: '',
       key: 'index',
       render: (data) => pug`
-        Span.name Round #{data.gameIndex + 1}
-      `
-    },
-    {
-      title: `Player1 (${players[0].name}) response`,
-      key: 'p1res',
-      render: (data) => renderResponse(_get(data, 'players[0].response'))
-    },
-    {
-      title: `Player2 (${players[1].name}) response`,
-      key: 'p2res',
-      render: (data) => renderResponse(_get(data, 'players[1].response'))
-    },
-    {
-      title: `Player1 (${players[0].name}) points`,
-      key: 'p1points',
-      render: (data) => pug`
-        Span #{_get(data, 'players[0].points')}
-      `
-    },
-    {
-      title: `Player2 (${players[1].name}) points`,
-      key: 'p2points',
-      render: (data) => pug`
-        Span #{_get(data, 'players[1].points')}
-      `
-    },
-    {
-      title: 'Winner',
-      key: 'winner',
-      render: (data) => pug`
-        Span #{data.winnerName}
+        Span.name Round #{data.roundIndex + 1}
       `
     }
   ]
-  const preparedRounds = rounds.items.map((item) => ({
-    ...item,
-    winnerName: item.winnerId
-      ? _get(
-          players.find(({ id }) => id === item.winnerId),
-          'name',
-          'Draw'
-        )
-      : 'Waiting for answers',
-    players: players.map((player) => ({ ...item.players[player.id] }))
-  }))
+
+  const playerColumns = [
+    {
+      title: 'Name',
+      key: 'name',
+      render: (data) => pug`
+        Span.line.text #{data.name}
+      `
+    },
+    {
+      title: 'Role',
+      key: 'role',
+      render: (data) => pug`
+        Span.line.text #{data.role}
+      `
+    },
+    {
+      title: 'Answers',
+      key: 'answers',
+      render: (data) => pug`
+        Span.line.text #{data.answers.join(',')}
+      `
+    },
+    {
+      title: 'Score',
+      key: 'score',
+      render: (data) => pug`
+        Span.line.text #{data.score}
+      `
+    },
+    {
+      title: 'Total Score',
+      key: 'totalScore',
+      render: (data) => pug`
+        Span.line.text #{data.totalScore}
+      `
+    }
+  ]
+
+  const roundExpandedRowRender = (row) => {
+    return pug`
+      Table(
+        dataSource=row.players
+        columns=playerColumns
+        rowKey=item => item.id
+      )
+    `
+  }
+
   return pug`
-    Table(dataSource=preparedRounds columns=columns rowKey=item => item.id pagination=rounds.pagination colorScheme='secondary')
+    Table(
+      dataSource=dataSource 
+      columns=roundColumns 
+      rowKey=item => item.id pagination=rounds.pagination colorScheme='secondary' 
+      expandedRowKeys='all'
+      expandedRowRender=roundExpandedRowRender
+    )
   `
 }
 
