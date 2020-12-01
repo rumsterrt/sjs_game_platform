@@ -20,7 +20,7 @@ export default withRouter(
     })
 
     const [gameGroup = { status: 'processing' }] = useDoc('gameGroups', _get(gameGroups, '[0].id'))
-
+    console.log('player', { game, gameGroup })
     return pug`
       Div.root
         if game.status === GAME_STATUSES.WAIT_PLAYERS
@@ -28,6 +28,8 @@ export default withRouter(
         if game.status === GAME_STATUSES.WAIT_START
           GroupsPlayersTable(gameId=gameId onlyUserGroup)
           Span Waiting to start the game
+        if game.status === GAME_STATUSES.STARTED && gameGroup.status === 'processing_common'
+          RoundForm(gameGroupId=gameGroup.id common)
         if game.status === GAME_STATUSES.STARTED && gameGroup.status === 'processing'
           RoundForm(gameGroupId=gameGroup.id)
         if game.status === GAME_STATUSES.FINISHED || gameGroup.status === 'finished'

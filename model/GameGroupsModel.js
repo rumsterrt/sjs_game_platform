@@ -2,6 +2,8 @@ import { BaseModel } from 'startupjs/orm'
 import _toPairs from 'lodash/toPairs'
 import _template from 'lodash/template'
 import _get from 'lodash/get'
+import _isEqual from 'lodash/isEqual'
+import _uniq from 'lodash/uniq'
 
 export default class GameGroupsModel extends BaseModel {
   getCurrentRound = async () => {
@@ -20,6 +22,34 @@ export default class GameGroupsModel extends BaseModel {
     return rounds.find(({ roundIndex }) => roundIndex === gameGroup.currentRound)
   }
 
+  commonResponseRound = async (playerId, response) => {
+    const { id: gameGroupId } = this.get()
+    const $gameGroup = this.scope(`gameGroups.${gameGroupId}`)
+    await $gameGroup.fetch()
+    const gameGroup = $gameGroup.get()
+    await $gameGroup.unfetch()
+
+    const round = await this.getCurrentRound()
+    const $round = this.scope(`rounds.${round.id}`)
+    await $round.fetch()
+
+    const previousAnswers = _get(round, 'commonAnswers') || { submit: [] }
+
+    const newAnswers = {
+      response,
+      submit: _isEqual(response, previousAnswers.response) ? _uniq([...previousAnswers.submit, playerId]) : [playerId]
+    }
+
+    $round.setEach({ commonAnswers: newAnswers })
+
+    // Somebody disagreed or didn't submit
+    if (newAnswers.submit.length !== Object.keys(gameGroup.players).length) {
+      return
+    }
+
+    $gameGroup.setEach({ status: 'processing' })
+  }
+
   responseRound = async (playerId, response) => {
     const { id: gameGroupId } = this.get()
     const model = this.root
@@ -33,7 +63,7 @@ export default class GameGroupsModel extends BaseModel {
     await $round.fetch()
 
     const newAnswers = {
-      ...round.answers,
+      ...round.commonAnswers,
       [playerId]: {
         response,
         submit: true

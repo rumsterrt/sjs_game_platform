@@ -25,8 +25,11 @@ const defaultQuestion = {
   inputSettings: {}
 }
 
-const QuestionsInput = ({ value = [], onChange, disabled, roles }) => {
+const QuestionsInput = ({ value = [], onChange, disabled, roles, common, emptyByDefault }) => {
   useEffect(() => {
+    if (emptyByDefault) {
+      return
+    }
     if (!value || value.length === 0) {
       onChange([{ ...defaultQuestion }])
     }
@@ -64,8 +67,9 @@ const QuestionsInput = ({ value = [], onChange, disabled, roles }) => {
     Collapse.root
       each item, index in value
         Collapse.Panel(key=index header="Question " + (index + 1) extra=getPanelExtra(index))
-          Form.Item(label="Roles")
-            Select(mode="multiple" placeholder='Select roles' options=roles value=item.role onChange=value=>onChangeItem(index, 'role', value) disabled=disabled)
+          if !common
+            Form.Item(label="Roles")
+              Select(mode="multiple" placeholder='Select roles' options=roles value=item.role onChange=value=>onChangeItem(index, 'role', value) disabled=disabled)
           Form.Item(label="Message")
             Input.TextArea(value=item.message name='message' placeholder='Enter message' onChange=e=>onChangeItem(index, 'message', e.target.value) disabled=disabled)
           Form.Item(label="Input type")

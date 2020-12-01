@@ -1,7 +1,6 @@
 import React from 'react'
 import { observer, useDoc } from 'startupjs'
 import { Button, Span } from '@startupjs/ui'
-import { GAME_STATUSES } from 'main/constants'
 import { useQueryTable } from 'main/hooks'
 import { Table } from 'components'
 import _toPairs from 'lodash/toPairs'
@@ -67,6 +66,6 @@ export default observer(({ gameId }) => {
       expandedRowKeys='all'
       expandedRowRender=groupExpandedRowRender
     )
-    Button(onPress=() => $game.setEach({status: GAME_STATUSES.STARTED})) Start game
+    Button(onPress=$game.startGame) Start game
   `
 })

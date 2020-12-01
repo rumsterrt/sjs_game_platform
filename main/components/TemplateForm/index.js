@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { observer, useQuery, model, useSession, useDoc } from 'startupjs'
-import { Input, InputNumber, Select, Form, Button, notification } from 'components/Antd'
+import { Input, InputNumber, Select, Form, Button, Checkbox, notification } from 'components/Antd'
 import QuestionsInput from './components/QuestionsInput'
 
 import './index.styl'
@@ -43,7 +43,7 @@ const TemplateForm = ({ templateId, onSubmit }) => {
   const onValuesChange = (values) => setLocalValues({ ...localValues, ...values })
 
   const isLocked = templateId && user.id !== template.teacherId
-
+  console.log('template', { template })
   return pug`
     Form.root(
       name='TemplateSettings'
@@ -60,6 +60,11 @@ const TemplateForm = ({ templateId, onSubmit }) => {
         InputNumber(min=1 placeholder='Enter number of rounds' type='number' disabled=isLocked)
       Form.Item(name='roles' label="Roles" rules=[{required: true, }])
         Select(mode='tags' placeholder='Input players roles' disabled=isLocked)
+      Form.Item(name='hasCommon' valuePropName="checked")
+        Checkbox(disabled=isLocked) Has common questions
+      if localValues.hasCommon
+        Form.Item(name='commonQuestions' label="Common Questions")
+          QuestionsInput(disabled=isLocked emptyByDefault common)
       Form.Item(name='questions' label="Questions")
         QuestionsInput(disabled=isLocked roles=(localValues.roles || []).map(item => ({label: item, value: item})))
       Form.Item(name='scoreCalc' label="Score calculation template")

@@ -1,6 +1,7 @@
 export const GAME_STATUSES = {
   WAIT_PLAYERS: 'wait_players',
   WAIT_START: 'wait_start',
+  STARTED_COMMON: 'started_common',
   STARTED: 'started',
   FINISHED: 'finished'
 }
