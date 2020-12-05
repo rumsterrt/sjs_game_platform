@@ -3,7 +3,7 @@ import { useLoader, Logo } from 'components'
 import { Div } from '@startupjs/ui'
 import { observer, emit, useSession } from 'startupjs'
 import axios from 'axios'
-import { Form, Input, Button } from 'components/Antd'
+import { Form, Input, Button, notification } from 'components/Antd'
 import './index.styl'
 
 const PLogin = () => {
@@ -27,10 +27,20 @@ const PLogin = () => {
     }
   }
 
+  const onFinishFailed = (errorInfo) => {
+    console.log('onFinishFailed', errorInfo)
+    notification.error({ message: 'Check fields errors!' })
+  }
+
   return pug`
     Div.root
       Logo(size=50)
-      Form(name='login' onFinish=onSubmit layout='vertical')
+      Form(
+        name='login'
+        onFinish=onSubmit
+        onFinishFailed=onFinishFailed
+        layout='vertical'
+      )
         Form.Item(name='email' label='Email' rules=[{ required: true, message: 'Please input your Email!' }])
           Input(placeholder="Email")
         Form.Item(name='password' label='Password' rules=[{ required: true, message: 'Please input your Password!' }])

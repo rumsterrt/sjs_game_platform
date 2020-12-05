@@ -53,7 +53,6 @@ const CustomTable = ({
   const renderRow = (row, index) => {
     if (expandedRowRender) {
       const isOpen = expandAll || expandedGameId === rowKey(row)
-      console.log('isOpen', { isOpen, row, expandedGameId, title })
 
       return pug`
         Collapse.collapse(

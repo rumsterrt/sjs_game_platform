@@ -12,10 +12,10 @@ const NumberInputSettings = ({ value = {}, onChange, disabled }) => {
 
   return pug`
     Card
-      Form.Item(label="Maximum limit")
-        InputNumber(value=value.max name='max' placeholder='Enter max value' onChange=e=>handleChange('max', e) disabled=disabled)
       Form.Item(label="Minimum limit")
-        InputNumber(value=value.min name='min' placeholder='Enter min value' onChange=e=>handleChange('min', e.target.value) disabled=disabled)
+        InputNumber(value=value.min name='min' max=value.max placeholder='Enter min value' onChange=e=>handleChange('min', e) disabled=disabled)
+      Form.Item(label="Maximum limit")
+        InputNumber(value=value.max name='max' min=value.min placeholder='Enter max value' onChange=e=>handleChange('max', e) disabled=disabled)
   `
 }
 

@@ -20,7 +20,7 @@ export default withRouter(
     })
 
     const [gameGroup = { status: 'processing' }] = useDoc('gameGroups', _get(gameGroups, '[0].id'))
-    console.log('player', { game, gameGroup })
+
     return pug`
       Div.root
         if game.status === GAME_STATUSES.WAIT_PLAYERS

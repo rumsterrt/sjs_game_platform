@@ -3,7 +3,7 @@ import { Div } from '@startupjs/ui'
 import { useLoader, Logo } from 'components'
 import { observer, emit, useSession } from 'startupjs'
 import axios from 'axios'
-import { Form, Input, Button, Checkbox } from 'components/Antd'
+import { Form, Input, Button, Checkbox, notification } from 'components/Antd'
 import './index.styl'
 
 const PRegister = () => {
@@ -28,10 +28,20 @@ const PRegister = () => {
     }
   }
 
+  const onFinishFailed = (errorInfo) => {
+    console.log('onFinishFailed', errorInfo)
+    notification.error({ message: 'Check fields errors!' })
+  }
+
   return pug`
     Div.root
       Logo(size=50)
-      Form(name='register' onFinish=onSubmit layout='vertical')
+      Form(
+        name='register'
+        onFinish=onSubmit
+        onFinishFailed=onFinishFailed
+        layout='vertical'
+      )
         Form.Item(name='name' label='Name' rules=[{ required: true, message: 'Please input your Name!' }])
           Input(placeholder="Name")
         Form.Item(name='email' label='Email' rules=[{ required: true, message: 'Please input your Email!' }])

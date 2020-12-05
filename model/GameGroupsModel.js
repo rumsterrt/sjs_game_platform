@@ -63,7 +63,7 @@ export default class GameGroupsModel extends BaseModel {
     await $round.fetch()
 
     const newAnswers = {
-      ...round.commonAnswers,
+      ...round.answers,
       [playerId]: {
         response,
         submit: true
@@ -88,6 +88,7 @@ export default class GameGroupsModel extends BaseModel {
 
     // Calc scores
     const compiled = _template(`(() => {${template.scoreCalc}})()`)
+
     const args = _toPairs(gameGroup.players).reduce((acc, item) => {
       return { ...acc, [item[1]]: { response: newAnswers[item[0]].response.map((ans) => `\`${ans}\``) } }
     }, {})
@@ -111,7 +112,7 @@ export default class GameGroupsModel extends BaseModel {
       },
       { scores: {}, totalScores: {} }
     )
-    console.log('scoreInfos', { scoreInfos })
+
     $round.setEach(scoreInfos)
 
     if (round.roundIndex + 1 === template.rounds) {

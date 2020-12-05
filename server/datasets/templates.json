@@ -80,7 +80,7 @@
           "message": "Max invent value"
         }
       ],
-      "scoreCalc": "if(${Inventor.response[0]} !== ${Guesser.response[0]}) {\n\treturn ${currentRole} === “Inventor” ? 1 : 0\n}\nreturn ${currentRole} === “Inventor” ? 0 : 1"
+      "scoreCalc": "if(${Inventor.response[0]} !== ${Guesser.response[0]}) {\n\treturn ${currentRole} === \"Inventor\" ? 1 : 0\n}\nreturn ${currentRole} === \"Inventor\" ? 0 : 1"
     }
   ]
 }

@@ -12,7 +12,7 @@ import './index.styl'
 const PPastGames = () => {
   const [user] = useSession('user')
   const [games = {}] = useQueryTable('games', user.isTeacher ? teacherGames(user.id) : playerGames(user.id))
-  console.log('games', { games })
+
   const columns = [
     {
       title: 'Name',

@@ -24,6 +24,7 @@ const TemplateForm = ({ templateId, onSubmit }) => {
   }, [JSON.stringify(template)])
 
   const onFinish = async (values) => {
+    console.log('values', values)
     if (templateId) {
       $templates.at(templateId).setEach({
         ...values
@@ -40,15 +41,22 @@ const TemplateForm = ({ templateId, onSubmit }) => {
     })
     onSubmit && onSubmit()
   }
+
+  const onFinishFailed = (errorInfo) => {
+    console.log('onFinishFailed', errorInfo)
+    notification.error({ message: 'Check fields errors!' })
+  }
+
   const onValuesChange = (values) => setLocalValues({ ...localValues, ...values })
 
   const isLocked = templateId && user.id !== template.teacherId
-  console.log('template', { template })
+
   return pug`
     Form.root(
       name='TemplateSettings'
       initialValues=template
       onFinish=onFinish
+      onFinishFailed=onFinishFailed
       onValuesChange=onValuesChange
       layout="vertical"
     )
