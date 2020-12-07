@@ -18,13 +18,11 @@ const TemplateForm = ({ templateId, onSubmit }) => {
   const [localValues, setLocalValues] = useState({})
   const [template = {}] = useDoc('templates', templateId)
   const [, $templates] = useQuery('templates')
-
   useEffect(() => {
     setLocalValues(template || defaultInit)
   }, [JSON.stringify(template)])
 
   const onFinish = async (values) => {
-    console.log('values', values)
     if (templateId) {
       $templates.at(templateId).setEach({
         ...values

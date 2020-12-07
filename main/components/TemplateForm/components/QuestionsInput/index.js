@@ -48,11 +48,11 @@ const QuestionsInput = ({ value = [], onChange, disabled, roles, common, emptyBy
     onChange(newValue)
   }
 
-  const renderInputSettings = (index, item, value) => {
+  const renderInputSettings = (index, item, value, canBeTemplate) => {
     const SettingsRender = inputSettingsRenderMap[item.inputType]
     return pug`
       if SettingsRender
-        SettingsRender(value=item.inputSettings onChange=value=>onChangeItem(index, 'inputSettings', value) disabled=disabled)
+        SettingsRender(value=item.inputSettings onChange=value=>onChangeItem(index, 'inputSettings', value) disabled=disabled addTemplateField=canBeTemplate)
     `
   }
 
@@ -75,7 +75,7 @@ const QuestionsInput = ({ value = [], onChange, disabled, roles, common, emptyBy
           Form.Item(label="Input type")
             Select(placeholder='Select Input type' options=Object.keys(INPUT_TYPES).map(item=>({label:item, value: item})) value=item.inputType onChange=value=>onChangeItem(index, 'inputType', value) disabled=disabled)
           Form.Item(label="Input settings")
-            = renderInputSettings(index, item, value)
+            = renderInputSettings(index, item, value, !common)
     Button(variant='text' onClick=onAdd icon=faPlus disabled=disabled)
   `
 }

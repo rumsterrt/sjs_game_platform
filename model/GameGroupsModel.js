@@ -22,6 +22,23 @@ export default class GameGroupsModel extends BaseModel {
     return rounds.find(({ roundIndex }) => roundIndex === gameGroup.currentRound)
   }
 
+  cancelResponseByPlayer = async (playerId, commonQuestions) => {
+    const round = await this.getCurrentRound()
+    const $round = this.scope(`rounds.${round.id}`)
+    await $round.fetch()
+    if (commonQuestions) {
+      const answers = _get(round, 'commonAnswers') || { submit: [] }
+      answers.submit = answers.submit.filter((item) => item !== playerId)
+      $round.setEach({ commonAnswers: answers })
+      return
+    }
+    const answers = _get(round, 'answers') || { submit: [] }
+    if (answers[playerId]) {
+      answers[playerId].submit = false
+      $round.setEach({ answers })
+    }
+  }
+
   commonResponseRound = async (playerId, response) => {
     const { id: gameGroupId } = this.get()
     const $gameGroup = this.scope(`gameGroups.${gameGroupId}`)
@@ -125,7 +142,10 @@ export default class GameGroupsModel extends BaseModel {
         roundIndex: round.roundIndex + 1,
         answers: {}
       })
-      $gameGroup.setEach({ currentRound: round.roundIndex + 1 })
+      $gameGroup.setEach({
+        currentRound: round.roundIndex + 1,
+        status: template.hasCommon ? 'processing_common' : 'processing'
+      })
     }
 
     await $round.unfetch()
