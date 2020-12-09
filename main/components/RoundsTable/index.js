@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { observer, useDoc, useQuery } from 'startupjs'
-import { Span } from '@startupjs/ui'
-import { Table } from 'components'
+import { Span, Row } from '@startupjs/ui'
+import { View } from 'react-native'
 import { useQueryTable } from 'main/hooks'
+import { Popover, Button } from 'components/Antd'
+import { Table } from 'components'
 import _get from 'lodash/get'
 
 import './index.styl'
@@ -10,6 +12,8 @@ import './index.styl'
 const RoundsTable = ({ gameGroupId, gameId, includeCurrent, fromLast }) => {
   const [dataSource, setDataSource] = useState([])
   const [gameGroup = {}] = useDoc('gameGroups', gameGroupId)
+  const [game = {}] = useDoc('games', gameGroup.gameId)
+  const [template = {}] = useDoc('templates', game.templateId)
   const roundQuery = { gameGroupId, $sort: { roundIndex: fromLast ? -1 : 1 } }
   if (!includeCurrent) {
     roundQuery.scores = { $ne: null }
@@ -28,7 +32,8 @@ const RoundsTable = ({ gameGroupId, gameId, includeCurrent, fromLast }) => {
       players: players.map((player) => ({
         ...player,
         role: gameGroup.players[player.id],
-        answers: _get(item, `answers.${player.id}.response`),
+        answers: _get(item, `answers.${player.id}.response`) || [],
+        commonAnswers: _get(item, 'commonAnswers.response') || [],
         score: item.scores[player.id],
         totalScore: item.totalScores[player.id]
       }))
@@ -38,6 +43,25 @@ const RoundsTable = ({ gameGroupId, gameId, includeCurrent, fromLast }) => {
 
   if (!gameId) {
     return null
+  }
+
+  const renderFullAnswers = (data) => {
+    const role = data.role
+    const roleQuestions = (template.questions || []).filter((item) => item.role.includes(role))
+    return pug`
+      View.answerContainer
+        if template.hasCommon
+          Row.answerTitle
+            Span.answerText Common answers
+          each item, index in template.commonQuestions
+            Row.answer(key=index)
+              Span.answerText #{item.message}: #{_get(data,'commonAnswers.'+index)}
+        Row.answerTitle
+          Span.answerText Player answers
+        each item, index in roleQuestions
+          Row.answer(key=index)
+            Span.answerText #{item.message}: #{_get(data,'answers.'+index)}
+    `
   }
 
   const roundColumns = [
@@ -69,7 +93,8 @@ const RoundsTable = ({ gameGroupId, gameId, includeCurrent, fromLast }) => {
       title: 'Answers',
       key: 'answers',
       render: (data) => pug`
-        Span.line.text #{data.answers.join(',')}
+        Popover(content=renderFullAnswers(data) title="Answers" trigger="click")
+          Button Show answers
       `
     },
     {
@@ -103,7 +128,6 @@ const RoundsTable = ({ gameGroupId, gameId, includeCurrent, fromLast }) => {
       dataSource=dataSource 
       columns=roundColumns 
       rowKey=item => item.id pagination=rounds.pagination colorScheme='secondary' 
-      expandedRowKeys='all'
       expandedRowRender=roundExpandedRowRender
     )
   `

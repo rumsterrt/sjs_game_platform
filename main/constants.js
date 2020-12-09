@@ -6,6 +6,14 @@ export const GAME_STATUSES = {
   FINISHED: 'finished'
 }
 
+export const GAME_STATUSES_TEXT = {
+  wait_players: 'Waiting for players',
+  wait_start: 'Waiting to game start',
+  started_common: '',
+  started: '',
+  finished: 'Game finished'
+}
+
 export const INPUT_TYPES = {
   TextInput: 'TextInput',
   NumberInput: 'NumberInput',

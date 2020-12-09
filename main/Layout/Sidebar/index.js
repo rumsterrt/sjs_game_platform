@@ -34,7 +34,7 @@ const menuItems = [
 ]
 
 export default observer(function ({ children, ...props }) {
-  const [$open] = useLocal('_session.sidebar')
+  const [, $open] = useLocal('_session.sidebar')
   const [{ user }] = useLocal('_session')
   const [fixedLayout, $fixedLayout] = useValue(isFixedLayout())
 
@@ -43,11 +43,16 @@ export default observer(function ({ children, ...props }) {
     return () => Dimensions.removeEventListener('change', handleWidthChange)
   }, [])
 
+  const handleSidebarClick = (action) => () => {
+    action && action()
+    $open.set(false)
+  }
+
   const renderSidebar = () => pug`
     Menu(mode="inline" style={height: '100%'})
       each item, index in menuItems
         if !item.onlyTeacher || (item.onlyTeacher && user.isTeacher)
-          Menu.Item(key=index onClick=item.action) #{item.title}
+          Menu.Item(key=index onClick=handleSidebarClick(item.action)) #{item.title}
   `
 
   const handleWidthChange = () => {

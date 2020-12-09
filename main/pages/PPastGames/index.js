@@ -1,6 +1,6 @@
 import React from 'react'
 import { observer, useSession } from 'startupjs'
-import { Div, Span } from '@startupjs/ui'
+import { Span } from '@startupjs/ui'
 import { Table } from 'components'
 import GroupsTable from 'main/components/GroupsTable'
 import moment from 'moment'
@@ -55,17 +55,14 @@ const PPastGames = () => {
   }
 
   return pug`
-    Div.root
-      Div.coursesContainer
-        Div.table
-          Table(
-            title='Past games'
-            dataSource=games.items
-            pagination=games.pagination
-            columns=columns
-            rowKey=item => item.id
-            expandedRowRender=rowExpandRender
-          )
+    Table(
+      title='Past games'
+      dataSource=games.items
+      pagination=games.pagination
+      columns=columns
+      rowKey=item => item.id
+      expandedRowRender=rowExpandRender
+    )
   `
 }
 

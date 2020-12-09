@@ -21,13 +21,14 @@ const Topbar = () => {
   const [{ user }] = useLocal('_session')
   const [openSidebar, $openSidebar] = useLocal('_session.sidebar')
   const [menuOpen, setMenuOpen] = useState(false)
+
   return pug`
     Div.wrapper
       Div.root
         Div.content
           Row(vAlign='center')
             Button(
-              onClick=()=>$openSidebar.set(!openSidebar)
+              onPress=()=>$openSidebar.set(!openSidebar)
               icon=faBars
               variant='text'
             )

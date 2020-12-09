@@ -3,7 +3,6 @@ import { Collapse, Pagination, Row, H3, Div, Span } from '@startupjs/ui'
 import './index.styl'
 
 const CollapseHeader = Collapse.Header
-const CollapseContent = Collapse.Content
 
 const CustomTable = ({
   pagination,
@@ -56,12 +55,12 @@ const CustomTable = ({
 
       return pug`
         Collapse.collapse(
-            key=index
-            open=isOpen
-            onChange=() => handleExpand(!isOpen, row)
-            styleName=[{[colorScheme]: true, odd: index%2 > 0}]
-            variant='pure'
-          )
+          key=index
+          open=isOpen
+          onChange=() => handleExpand(!isOpen, row)
+          styleName=[{[colorScheme]: true, odd: index%2 > 0}]
+          variant='pure'
+        )
           CollapseHeader(iconPosition='left')
             Div.row(key=index styleName=[{odd: index%2 > 0}])
               each column, colIndex in columns
@@ -71,8 +70,8 @@ const CustomTable = ({
                 )
                   Span.mobileHead #{column.title}
                   =columnMap[column.key] && columnMap[column.key].render(row, index, pagination)
-          CollapseContent.collapseContent
-            =expandedRowRender(row)
+        Div.collapseContent
+          =isOpen && expandedRowRender(row)
     `
     }
 
@@ -100,7 +99,7 @@ const CustomTable = ({
         Div.head
           Row.row.head(styleName=[{[colorScheme]: true}])
             each column, index in columns
-              Div.headData(key=column.key styleName=[{first: index === 0, last: index === columns.length - 1, expanded: !!expandedGameId }])
+              Div.headData(key=column.key styleName=[{first: index === 0, last: index === columns.length - 1 }])
                 Span.headText #{column.title}
         Div.body
           if dataSource.length > 0

@@ -22,16 +22,19 @@ export default class GamesModel extends BaseModel {
     const template = $template.get()
     await $template.unfetch()
 
-    if (game.status !== 'wait_players' || game.playerIds.length < template.roles) {
-      return
-    }
     const rolesCount = template.roles.length
+
+    if (game.status !== 'wait_players' || game.playerIds.length < rolesCount) {
+      return new Error('There not enough players to form at least one group')
+    }
+
     const groupsCount = Math.floor(game.playerIds.length / rolesCount)
 
     new Array(groupsCount).fill().forEach((_, index) => {
       const players = game.playerIds
-        .slice(index * rolesCount, rolesCount)
+        .slice(index * rolesCount, index * rolesCount + rolesCount)
         .reduce((acc, item, index) => ({ ...acc, [item]: template.roles[index] }), {})
+
       const gameGroupId = model.id()
       model.add('gameGroups', {
         id: gameGroupId,

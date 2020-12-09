@@ -5,7 +5,6 @@ import { H4 } from '@startupjs/ui'
 import { INPUT_TYPES } from 'main/constants'
 import _get from 'lodash/get'
 import _template from 'lodash/template'
-import _isNumber from 'lodash/isNumber'
 import _isNil from 'lodash/isNil'
 
 import './index.styl'
