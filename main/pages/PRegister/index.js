@@ -4,6 +4,7 @@ import { useLoader, Logo } from 'components'
 import { observer, emit, useSession } from 'startupjs'
 import axios from 'axios'
 import { Form, Input, Button, Checkbox, notification } from 'components/Antd'
+import _get from 'lodash/get'
 import './index.styl'
 
 const PRegister = () => {
@@ -23,6 +24,8 @@ const PRegister = () => {
       window.location.href += ''
     } catch (err) {
       console.log(err)
+      const description = _get(err, 'response.data.error.message', 'Something goes wrong!')
+      notification.error({ message: description })
     } finally {
       $topbarProgress(false)
     }
