@@ -8,7 +8,12 @@ import Teacher from './teacher'
 const PGame = () => {
   const [user] = useSession('user')
 
-  return user.isTeacher ? pug`Teacher` : pug`Player`
+  return pug`
+    if user.isTeacher
+      Teacher
+    else
+      Player
+  `
 }
 
 export default observer(PGame)

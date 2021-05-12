@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import { observer, useSession, useDoc } from 'startupjs'
-import { Input, InputNumber, Text, Select, Form, Button } from 'components/Antd'
-import { H4 } from '@startupjs/ui'
+import { Input, InputNumber, Select, Form, useForm, FormItem } from 'components/Form'
+import { Notification } from 'components'
+import { H4, Button, Span } from '@startupjs/ui'
 import { INPUT_TYPES } from 'main/constants'
 import _get from 'lodash/get'
 import _template from 'lodash/template'
 import _isNil from 'lodash/isNil'
 
 import './index.styl'
-import { notification } from 'antd'
 
 const RoundForm = ({ gameGroupId, common }) => {
-  const [form] = Form.useForm()
+  const [form] = useForm()
   const [user = {}] = useSession('user')
   const [gameGroup = {}, $gameGroup] = useDoc('gameGroups', gameGroupId)
   const [game = {}, $game] = useDoc('games', gameGroup.gameId)
@@ -44,19 +44,19 @@ const RoundForm = ({ gameGroupId, common }) => {
     setAnswers(newAnswers)
     const userRole = _get(gameGroup, `players.${user.id}`)
     setQuestions(common ? template.commonQuestions : template.questions.filter((item) => item.role.includes(userRole)))
-    form.setFieldsValue({ answers: newAnswers.response })
+    form.setFieldValue('answers', newAnswers.response)
   }, [JSON.stringify(currentRound)])
 
   if (!game || !gameGroup) {
     return pug`
-      Text You aren't in this game
+      Span You aren't in this game
     `
   }
 
   const getBorderValue = (border, isNumber) => {
     const borderValue = _get(border, 'value')
     if (_isNil(borderValue)) {
-      return null
+      return undefined
     }
     if (!border.isTemplate) {
       return borderValue
@@ -77,7 +77,7 @@ const RoundForm = ({ gameGroupId, common }) => {
         if (regex) {
           rules.push({
             pattern: new RegExp(regex, 'g'),
-            message: `Value must be relative to this pattern "${inputSettings.regex}"`
+            message: `Value must be relative to this pattern "${regex}"`
           })
         }
         const length = getBorderValue(inputSettings.length, true)
@@ -85,12 +85,12 @@ const RoundForm = ({ gameGroupId, common }) => {
           rules.push({ len: length, message: `Value length must be equal ${length}` })
         }
         return pug`
-          Form.Item(key=key name=key label=message rules=rules initialValue=initialValue)
+          FormItem(key=key name=key label=message rules=rules initialValue=initialValue)
             Input
         `
       }
       case INPUT_TYPES.NumberInput: {
-        const max = getBorderValue(inputSettings.max, true)
+        const max = getBorderValue(inputSettings.max.value, true)
         if (!_isNil(max)) {
           rules.push({
             type: 'number',
@@ -108,26 +108,26 @@ const RoundForm = ({ gameGroupId, common }) => {
         }
 
         return pug`
-          Form.Item(key=key name=key label=message rules=rules)
-            InputNumber(min=inputSettings.min max=inputSettings.max)
+          FormItem(key=key name=key label=message rules=rules)
+            InputNumber(min=min max=max)
         `
       }
       case INPUT_TYPES.Selector:
         return pug`
-          Form.Item(key=key name=key label=message rules=rules)
+          FormItem(key=key name=key label=message rules=rules)
             Select(options=inputSettings.options.map(item => ({label: item, value: item})))
         `
     }
   }
 
-  const onFinish = async ({ answers: formAnswers }) => {
-    await $game.responseByPlayer(user.id, formAnswers, common)
-    await getCurrentRound()
-  }
-
-  const onFinishFailed = (errorInfo) => {
-    console.log('onFinishFailed', errorInfo)
-    notification.error({ message: 'Check fields errors!' })
+  const onSubmit = async () => {
+    try {
+      const { answers: formAnswers } = form.validateFields()
+      await $game.responseByPlayer(user.id, formAnswers, common)
+      await getCurrentRound()
+    } catch (err) {
+      Notification.addNotify({ type: 'error', message: err.message })
+    }
   }
 
   const handleBackToEdit = () => {
@@ -141,16 +141,12 @@ const RoundForm = ({ gameGroupId, common }) => {
     if !answers.submit
       Form.root(
         form=form
-        name='RoundForm'
-        onFinish=onFinish
-        onFinishFailed=onFinishFailed
-        layout="vertical"
       )
         each question, index in questions
-          = renderField(['answers',index], question)
-        Button(type='primary' htmlType="submit") Next
+          = renderField('answers.'+index, question)
+        Button(onPress=onSubmit) Next
     else
-      Button(type='secondary' onClick=handleBackToEdit) Cancel
+      Button(onPress=handleBackToEdit) Cancel
   `
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Collapse, Pagination, Row, H3, Div, Span } from '@startupjs/ui'
+import { Table, Thead, Tbody, Tr, Th, Td, Collapse, Pagination, Row, H3, Div, Span } from '@startupjs/ui'
+import { ScrollView } from 'react-native'
 import './index.styl'
 
 const CollapseHeader = Collapse.Header
@@ -62,9 +63,9 @@ const CustomTable = ({
           variant='pure'
         )
           CollapseHeader(iconPosition='left')
-            Div.row(key=index styleName=[{odd: index%2 > 0}])
+            Tr.row(key=index styleName=[{odd: index%2 > 0}])
               each column, colIndex in columns
-                Div.data(
+                Td.data(
                   key=column.key
                   styleName=[{first: colIndex === 0, last:colIndex === columns.length - 1}]
                 )
@@ -76,9 +77,9 @@ const CustomTable = ({
     }
 
     return pug`
-      Row.row(key=index styleName=[{odd: index%2 > 0, [colorScheme]: true}])
+      Tr.row(key=index styleName=[{odd: index%2 > 0, [colorScheme]: true}])
         each column, colIndex in columns
-          Div.data(
+          Td.data(
             key=column.key
             styleName=[{first: colIndex === 0, last:colIndex === columns.length - 1}]
           )
@@ -94,20 +95,16 @@ const CustomTable = ({
     if title
       Row.header
         H3 #{title}
-    Div.tableWrapper
-      Div.table
-        Div.head
-          Row.row.head(styleName=[{[colorScheme]: true}])
+    ScrollView.tableWrapper
+      Table.table
+        Thead.head
+          Tr.row.head(styleName=[{[colorScheme]: true}])
             each column, index in columns
-              Div.headData(key=column.key styleName=[{first: index === 0, last: index === columns.length - 1 }])
+              Th.headData(key=column.key styleName=[{first: index === 0, last: index === columns.length - 1 }])
                 Span.headText #{column.title}
-        Div.body
-          if dataSource.length > 0
-            each row, index in dataSource
-              =renderRow(row, index)
-          else
-            Div.emptyData
-              Span Empty
+        Tbody.body
+          each row, index in dataSource
+            =renderRow(row, index)
       =renderPagination()
   `
 }

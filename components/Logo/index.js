@@ -1,12 +1,13 @@
 import React from 'react'
-import { Div, Span } from '@startupjs/ui'
+import { Div, Span, Button } from '@startupjs/ui'
 import './index.styl'
 
-const Logo = ({ onPress, size = 32 }) => {
+const Logo = ({ onPress, size = 32, ...props }) => {
+  const Root = onPress ? Button : Div
   return pug`
-    Div.root(onClick=() => onPress && onPress())
-      Span.title(style={fontSize:size+'px', lineHeight: size}) Game
-      Span.title.bottom(style={fontSize:size+'px', lineHeight: size}) Platformer
+    Root.root(...props variant=onPress && 'text' onPress=onPress)
+      Span.title(style={fontSize:size, lineHeight: size}) Game
+      Span.title.bottom(style={fontSize:size, lineHeight: size}) Platformer
   `
 }
 

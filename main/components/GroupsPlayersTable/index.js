@@ -25,12 +25,14 @@ const GroupsPlayersTable = ({ gameId, onlyUserGroup = false }) => {
         ...rest,
         players: Object.keys(groupPlayers).reduce((acc, playerId) => {
           const player = players.find((item) => item.id === playerId)
-
           if (!player) {
             return acc
           }
 
-          return [...acc, { name: player.name, id: playerId, role: groupPlayers[playerId] }]
+          return [
+            ...acc,
+            { name: player.firstName + ' ' + player.lastName, id: playerId, role: groupPlayers[playerId] }
+          ]
         }, [])
       }
     })
@@ -42,7 +44,7 @@ const GroupsPlayersTable = ({ gameId, onlyUserGroup = false }) => {
       title: 'Name',
       key: 'name',
       render: (data) => pug`
-        Span.line.text #{data.name}
+        Span.line.text #{data.firstName + ' ' + data.lastName}
       `
     },
     {

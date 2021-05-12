@@ -18,7 +18,7 @@ export default observer(({ gameId }) => {
       title: 'Name',
       key: 'name',
       render: (data) => pug`
-        Span.line.text #{data.name}
+        Span.line.text #{data.firstName + ' ' + data.lastName}
       `
     },
     {

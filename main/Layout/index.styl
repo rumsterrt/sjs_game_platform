@@ -6,12 +6,13 @@ $logoColor = #FCB69D
   width 100%
   height 100%
 
-.content
-  margin-top 4u
-  height calc(100% - 4u)
+.contentWrapper
+  height 100%
+  display flex
+  width 100%
 
-.sidebar
-  height calc(100% - 8u)
+.content
+  margin-bottom: 8u
 
 .menu
   background-color rgba(black, 0.02)
@@ -29,3 +30,12 @@ $logoColor = #FCB69D
 
 .body
   flex 1
+
+.authRoot
+  margin auto
+  background white
+  padding 2u
+  width 100%
+  +tablet()
+    padding 4u
+    width 50u

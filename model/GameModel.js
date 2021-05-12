@@ -1,7 +1,7 @@
 import { BaseModel } from 'startupjs/orm'
 import _get from 'lodash/get'
 
-export default class GamesModel extends BaseModel {
+export default class GameModel extends BaseModel {
   startGame = async () => {
     const { id: gameId } = this.get()
     const $game = this.scope(`games.${gameId}`)

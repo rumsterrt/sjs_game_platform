@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { Loader as SJSLoader } from '@startupjs/ui'
+import { Loader as SJSLoader, Div } from '@startupjs/ui'
 import { useLocal, observer } from 'startupjs'
 import './index.styl'
 
 const useLoader = (() => {
   let currentOwnerId, status
-  let $status = () => ({})
+  let handleStatus = () => ({})
 
   return ([topbarProgress, $topbarProgress] = []) => {
     const [controlsId] = useState(setTimeout(() => ({})))
@@ -15,16 +15,16 @@ const useLoader = (() => {
     }
 
     if ($topbarProgress) {
-      $status = (...args) => $topbarProgress.set(...args)
+      handleStatus = (...args) => $topbarProgress.set(...args)
     }
 
     const set = (flag) => {
       if (flag) {
         currentOwnerId = controlsId
-        $status(true)
+        handleStatus(true)
       } else {
         if (controlsId === currentOwnerId) {
-          $status(false)
+          handleStatus(false)
         }
       }
     }
@@ -38,7 +38,8 @@ const Loader = observer(() => {
 
   return pug`
     if loader
-      SJSLoader.loader(color='#00AED6')
+      Div.loader
+        SJSLoader(color='#00AED6')
   `
 })
 

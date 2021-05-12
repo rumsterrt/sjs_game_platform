@@ -1,10 +1,9 @@
 import React from 'react'
 import './index.styl'
-import { Platform, SafeAreaView, View } from 'react-native'
-import { observer, useLocal } from 'startupjs'
-import { Content } from '@startupjs/ui'
-import { PLogin } from 'main/pages'
-import { Loader } from 'components'
+import { Platform, SafeAreaView, View, ScrollView } from 'react-native'
+import { observer, useLocal, emit } from 'startupjs'
+import { Content, Portal } from '@startupjs/ui'
+import { Loader, Modal, Notification, Logo } from 'components'
 import { withRouter } from 'react-router-native'
 
 import Topbar from './Topbar'
@@ -17,28 +16,31 @@ export default withRouter(
     if (!user) {
       if (location.pathname.match(/auth\/.+/)) {
         return pug`
-          View.layout
-            Main.content= children
+          Portal.Provider
+            View.authRoot
+              Logo
+              = children
         `
       }
-      return pug`
-        View.layout
-          Main.content
-            PLogin
-    `
+      emit('url', '/auth/sign-in')
+      return null
     }
 
     const main = pug`
-      View.layout
-        Topbar
-        Sidebar.sidebar
-          Content(
-            padding
-            width='full'
-            style={ backgroundColor: 'white'}
-          )
-            Loader
-            Main.content= children
+      Portal.Provider
+        View.layout
+          Modal.Portal
+          Notification.Portal
+          Loader
+          Topbar
+          View.contentWrapper
+            Sidebar.sidebar
+              Content(
+                padding
+                width='full'
+                style={ backgroundColor: 'white', height: '100%', overflowY: 'scroll'}
+              )
+                Main.content= children
     `
     return main
   })
@@ -47,7 +49,7 @@ export default withRouter(
 const Main = observer(({ children, style }) => {
   return pug`
     Wrapper
-      View(style=style)
+      ScrollView(style=style)
         = children
   `
 })

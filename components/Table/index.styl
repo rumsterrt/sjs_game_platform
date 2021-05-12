@@ -1,6 +1,7 @@
 .tableWrapper
-    overflow auto
     width 100%
+    +web()
+      overflow auto
 
 .header
   justify-content center
@@ -8,9 +9,12 @@
   margin-bottom 2u
 
 .row
-  display block
+  display flex
+  flex-direction column
   padding 2u
   width 100%
+  +web()
+    display block
   +tablet()
     display flex
     flex-direction row

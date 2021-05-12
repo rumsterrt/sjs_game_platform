@@ -2,12 +2,19 @@ import React from 'react'
 import { observer, emit, useQuery, model, useSession } from 'startupjs'
 import { Span, Card, Div, Icon, Button, Row } from '@startupjs/ui'
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons'
-import { Modal, notification, Upload, Button as AntButton } from 'components/Antd'
-import { useLoader } from 'components'
+import { useLoader, Modal, Notification } from 'components'
+import { Platform } from 'react-native'
 import { GAME_STATUSES } from 'main/constants'
 import _isArray from 'lodash/isArray'
 
 import './index.styl'
+
+const uploadButtonStyle = {
+  border: '1px solid #ccc',
+  display: 'inline-block',
+  padding: '8px',
+  cursor: 'pointer'
+}
 
 const PLibrary = () => {
   const [user] = useSession('user')
@@ -35,17 +42,17 @@ const PLibrary = () => {
     })
   }
 
-  const uploadFile = (file) => {
+  const uploadFile = (e) => {
     $topbarProgress(true)
     const reader = new FileReader()
-    reader.readAsText(file)
+    reader.readAsText(e.target.files[0])
     reader.onload = async () => {
       try {
         const readerData = JSON.parse(reader.result)
         const newTemplates = _isArray(readerData) ? readerData : [readerData]
         newTemplates.forEach((template) => $template.add({ ...template, teacherId: user.id }))
       } catch (err) {
-        notification.error({ message: 'Can upload file' })
+        Notification.addNotify({ type: 'error', message: 'Can upload file' })
       } finally {
         $topbarProgress(false)
       }
@@ -54,9 +61,17 @@ const PLibrary = () => {
 
   return pug`
     Div.root
-      Row.actions
-        Upload(beforeUpload=uploadFile accept="file" fileList=null)
-          AntButton(disabled=topbarProgress loading=topbarProgress type="primary") Import from JSON
+      if Platform.OS === 'web'
+        Row.actions
+          label(style=uploadButtonStyle for="file-upload" disabled=topbarProgress) Import from JSON
+          input(
+            id="file-upload"
+            onChange=uploadFile
+            type="file"
+            accept=".json"
+            style={display: 'none'}
+            disabled=topbarProgress
+          )
       Div.main
         Card.card(onPress=() => emit('url', '/addTemplate'))
           Icon.plusIcon(icon=faPlus)

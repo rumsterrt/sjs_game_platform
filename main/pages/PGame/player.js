@@ -1,6 +1,6 @@
 import React from 'react'
 import { observer, useSession, useDoc, useQuery } from 'startupjs'
-import { Span, Div, Icon, Tooltip } from '@startupjs/ui'
+import { Span, Row, Div, Icon, Tooltip } from '@startupjs/ui'
 import { withRouter } from 'react-router-native'
 import _get from 'lodash/get'
 import { GAME_STATUSES } from 'main/constants'
@@ -24,10 +24,10 @@ export default withRouter(
     const [gameGroup = { status: 'processing' }] = useDoc('gameGroups', _get(gameGroups, '[0].id'))
 
     return pug`
-      Div.tools
+      Row(vAlign='center' align='right')
         Tooltip(content=template.description)
           Icon(icon=faQuestionCircle)
-      Div.root
+      Div
         if game.status === GAME_STATUSES.WAIT_PLAYERS
           Span Waiting for group formation
         if game.status === GAME_STATUSES.WAIT_START

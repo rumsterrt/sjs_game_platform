@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import { Button } from '@startupjs/ui'
 import { observer, useQuery, model, useSession, useDoc } from 'startupjs'
-import { Input, InputNumber, Select, Form, Button, Checkbox, notification } from 'components/Antd'
 import QuestionsInput from './components/QuestionsInput'
+import { Notification } from 'components'
+import { FormItem, Form, Input, Checkbox, InputNumber, ArrayInput, useForm } from 'components/Form'
 
 import './index.styl'
 
@@ -17,32 +19,33 @@ const TemplateForm = ({ templateId, onSubmit }) => {
   const [user = {}] = useSession('user')
   const [localValues, setLocalValues] = useState({})
   const [template = {}] = useDoc('templates', templateId)
+  const [form] = useForm({ initValue: template })
   const [, $templates] = useQuery('templates')
   useEffect(() => {
     setLocalValues(template || defaultInit)
   }, [JSON.stringify(template)])
 
-  const onFinish = async (values) => {
-    if (templateId) {
-      $templates.at(templateId).setEach({
-        ...values
+  const handleSubmit = () => {
+    try {
+      const values = form.validateFields()
+      if (templateId) {
+        $templates.at(templateId).setEach({
+          ...values
+        })
+      } else {
+        $templates.add({
+          id: templateId || model.id(),
+          teacherId: user.id,
+          ...values
+        })
+      }
+      Notification.addNotify({
+        message: templateId ? 'Template was updated' : 'Template was created'
       })
-    } else {
-      $templates.add({
-        id: templateId || model.id(),
-        teacherId: user.id,
-        ...values
-      })
+      onSubmit && onSubmit()
+    } catch (err) {
+      Notification.addNotify({ type: 'error', message: err.message })
     }
-    notification.info({
-      message: templateId ? 'Template was updated' : 'Template was created'
-    })
-    onSubmit && onSubmit()
-  }
-
-  const onFinishFailed = (errorInfo) => {
-    console.log('onFinishFailed', errorInfo)
-    notification.error({ message: 'Check fields errors!' })
   }
 
   const onValuesChange = (values) => setLocalValues({ ...localValues, ...values })
@@ -51,32 +54,42 @@ const TemplateForm = ({ templateId, onSubmit }) => {
 
   return pug`
     Form.root(
-      name='TemplateSettings'
-      initialValues=template
-      onFinish=onFinish
-      onFinishFailed=onFinishFailed
+      form=form
       onValuesChange=onValuesChange
-      layout="vertical"
     )
-      Form.Item(name='name' label="Name" rules=[{required: true, }])
+      FormItem(name='name' label="Name" rules=[{required: true, }])
         Input(placeholder='Enter name' disabled=isLocked)
-      Form.Item(name='description' label="Description" rules=[{required: true }])
-        Input.TextArea(placeholder='Enter description' disabled=isLocked)
-      Form.Item(name='rounds' label="Rounds" rules=[{required: true }])
+      FormItem(name='description' label="Description" rules=[{required: true }])
+        Input(
+          placeholder='Enter description'
+          disabled=isLocked
+          multiline
+          resize
+          numberOfLines=4
+        )
+      FormItem(name='rounds' label="Rounds" rules=[{required: true }])
         InputNumber(min=1 placeholder='Enter number of rounds' type='number' disabled=isLocked)
-      Form.Item(name='roles' label="Roles" rules=[{required: true, }])
-        Select(mode='tags' placeholder='Input players roles' disabled=isLocked)
-      Form.Item(name='hasCommon' valuePropName="checked")
+      FormItem(name='roles' label="Roles" rules=[{required: true, }])
+        ArrayInput(items={
+          input: 'text'
+        } placeholder='Input players roles' disabled=isLocked)
+      FormItem(name='hasCommon' valuePropName="checked")
         Checkbox(disabled=isLocked) Has common questions
       if localValues.hasCommon
-        Form.Item(name='commonQuestions' label="Common Questions")
+        FormItem(name='commonQuestions' label="Common Questions")
           QuestionsInput(disabled=isLocked emptyByDefault common)
-      Form.Item(name='questions' label="Questions")
+      FormItem(name='questions' label="Questions")
         QuestionsInput(disabled=isLocked roles=(localValues.roles || []).map(item => ({label: item, value: item})))
-      Form.Item(name='scoreCalc' label="Score calculation template")
-        Input.TextArea(placeholder='Enter score rules' disabled=isLocked)
+      FormItem(name='scoreCalc' label="Score calculation template")
+        Input(
+          placeholder='Enter score rules'
+          disabled=isLocked
+          multiline
+          resize
+          numberOfLines=4
+        )
       if !isLocked
-        Button(type='primary' htmlType="submit") Save
+        Button(onPress=handleSubmit) Save
   `
 }
 

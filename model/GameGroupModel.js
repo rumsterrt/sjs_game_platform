@@ -5,7 +5,7 @@ import _get from 'lodash/get'
 import _isEqual from 'lodash/isEqual'
 import _uniq from 'lodash/uniq'
 
-export default class GameGroupsModel extends BaseModel {
+export default class GameGroupModel extends BaseModel {
   getCurrentRound = async () => {
     const { id: gameGroupId } = this.get()
 
@@ -105,7 +105,6 @@ export default class GameGroupsModel extends BaseModel {
 
     // Calc scores
     const compiled = _template(`(() => {${template.scoreCalc}})()`)
-
     const args = _toPairs(gameGroup.players).reduce((acc, item) => {
       return { ...acc, [item[1]]: { response: newAnswers[item[0]].response.map((ans) => `\`${ans}\``) } }
     }, {})

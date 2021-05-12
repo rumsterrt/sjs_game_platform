@@ -1,11 +1,5 @@
-const getConfig = require('startupjs/bundler.cjs').webpackServerConfig
-const path = require('path')
-
-const ALIAS = {
-  serverHelpers: path.join(__dirname, '/serverHelpers')
-}
+const getConfig = require('startupjs/bundler/webpack.server.config.cjs')
 
 module.exports = getConfig(undefined, {
-  forceCompileModules: [],
-  alias: ALIAS
+  forceCompileModules: []
 })

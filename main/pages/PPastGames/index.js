@@ -29,7 +29,7 @@ const PPastGames = () => {
 
       ellipsis: true,
       render: (data) => pug`
-        Span.line.text #{user.isTeacher ? user.name : _get(data,'teacher.name')}
+        Span.line.text #{user.isTeacher ? user.firstName + ' ' + user.lastName : _get(data,'teacher.firstName') + ' ' + _get(data,'teacher.lastName')}
       `
     },
     {

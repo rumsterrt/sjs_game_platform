@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
 import { Card } from '@startupjs/ui'
-import { Input, InputNumber, Form, Col, Row } from 'components/Antd'
+import { Input, InputNumber, FormItem } from 'components/Form'
 import TemplateCheckbox from '../TemplateCheckbox'
 import _update from 'lodash/update'
 import _isEmpty from 'lodash/isEmpty'
+import _cloneDeep from 'lodash/cloneDeep'
 import _get from 'lodash/get'
 
 const defaultValue = {
@@ -19,30 +20,24 @@ const TextInputSettings = ({ value = {}, onChange, disabled, addTemplateField })
   }, [])
 
   const handleChange = (path, fieldValue) => {
-    const newValue = { ...value }
+    const newValue = _cloneDeep(value)
     _update(newValue, path, () => fieldValue || null)
     onChange(newValue)
   }
 
   return pug`
     Card
-      Form.Item(label="Length")
-        Col
-          if addTemplateField
-            Row
-              TemplateCheckbox(value=_get(value,'length.isTemplate') onChange=fieldValue=>handleChange('length.isTemplate', fieldValue) name='lengthTemplate' disabled=disabled)
-          Row
-            if !_get(value,'length.isTemplate')
-              InputNumber(value=_get(value,'length.value') name='lengthValue' min=1 placeholder='Enter length' onChange=fieldValue=>handleChange('length.value', fieldValue) disabled=disabled style={width: '100%'})
-            else
-              Input(value=_get(value,'length.value') name='lengthValue' placeholder='Enter length template' onChange=e=>handleChange('length.value', e.target.value) disabled=disabled)
-      Form.Item(label="Regular expression")
-        Col
-          if addTemplateField
-            Row
-              TemplateCheckbox(value=_get(value,'regex.isTemplate') onChange=fieldValue=>handleChange('regex.isTemplate', fieldValue) name='regexTemplate' disabled=disabled)
-          Row
-            Input(value=_get(value,'regex.value') name='regexValue' placeholder='Enter regex' onChange=e=>handleChange('regex.value', e.target.value) disabled=disabled)
+      FormItem(label="Length")
+        if addTemplateField
+          TemplateCheckbox(value=_get(value,'length.isTemplate') onChange=fieldValue=>handleChange('length.isTemplate', fieldValue) name='lengthTemplate' disabled=disabled)
+          if !_get(value,'length.isTemplate')
+            InputNumber(value=_get(value,'length.value') name='lengthValue' min=1 placeholder='Enter length' onChange=fieldValue=>handleChange('length.value', fieldValue) disabled=disabled style={width: '100%'})
+          else
+            Input(value=_get(value,'length.value') name='lengthValue' placeholder='Enter length template' onChange=val=>handleChange('length.value', val) disabled=disabled)
+      FormItem(label="Regular expression")
+        if addTemplateField
+          TemplateCheckbox(value=_get(value,'regex.isTemplate') onChange=fieldValue=>handleChange('regex.isTemplate', fieldValue) name='regexTemplate' disabled=disabled)
+        Input(value=_get(value,'regex.value') name='regexValue' placeholder='Enter regex' onChange=val=>handleChange('regex.value', val) disabled=disabled)
   `
 }
 

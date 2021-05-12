@@ -1,6 +1,6 @@
 import React from 'react'
 import { observer, useSession, emit } from 'startupjs'
-import { Span, Button, Div } from '@startupjs/ui'
+import { Span, Button } from '@startupjs/ui'
 import { Table } from 'components'
 import moment from 'moment'
 import { useQueryTable } from 'main/hooks'
@@ -38,15 +38,12 @@ export default observer(() => {
       title: '',
       key: 'join',
       render: (data) => pug`
-        Button(onClick=()=>emit('url', '/games/' + data.id)) JOIN
+        Button(onPress=()=>emit('url', '/games/' + data.id)) JOIN
       `
     }
   ]
 
   return pug`
-    Div
-      Div.root
-        Div.table
-          Table(title='Active Games' dataSource=items columns=columns rowKey=item => item.id pagination=pagination)
+    Table(title='Active Games' dataSource=items columns=columns rowKey=item => item.id pagination=pagination)
   `
 })

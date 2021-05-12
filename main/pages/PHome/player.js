@@ -23,7 +23,7 @@ export default observer(() => {
       title: 'Teacher',
       key: 'teacher',
       render: (data) => pug`
-        Span #{data.teacher.name}
+        Span #{data.teacher.firstName + ' ' + data.teacher.lastName}
       `
     },
     {
@@ -44,7 +44,7 @@ export default observer(() => {
       title: '',
       key: 'join',
       render: (data) => pug`
-        Button(onClick=()=>handleJoinGame(data)) #{data.playerIds.includes(user.id)? 'BACK' : 'JOIN'}
+        Button(onPress=()=>handleJoinGame(data)) #{data.playerIds.includes(user.id)? 'BACK' : 'JOIN'}
       `
     }
   ]

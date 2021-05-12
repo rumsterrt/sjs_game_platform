@@ -5,16 +5,6 @@ export default (components = {}) => [
     component: components.PHome
   },
   {
-    path: '/auth/register',
-    exact: true,
-    component: components.PRegister
-  },
-  {
-    path: '/auth/login',
-    exact: true,
-    component: components.PLogin
-  },
-  {
     path: '/games/:gameId',
     exact: true,
     component: components.PGame

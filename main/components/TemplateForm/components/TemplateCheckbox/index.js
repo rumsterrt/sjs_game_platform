@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import { Checkbox, Tooltip } from 'components/Antd'
+import { Tooltip } from '@startupjs/ui'
+import { Checkbox } from 'components/Form'
 import _isEmpty from 'lodash/isEmpty'
 
 const defaultValue = {
@@ -17,8 +18,8 @@ const SelectInputSettings = ({ value = {}, onChange, disabled, name }) => {
   }, [])
 
   return pug`
-    Tooltip(title=title)
-      Checkbox(value=value onChange=e=>onChange && onChange(e.target.checked) name=name disabled=disabled) Is template
+    Tooltip(content=title)
+      Checkbox(value=value onChange=checked=>onChange && onChange(checked) name=name disabled=disabled) Is template
   `
 }
 

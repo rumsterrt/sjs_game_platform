@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Card } from '@startupjs/ui'
-import { Select, Form } from 'components/Antd'
-
+import { ArrayInput, FormItem } from 'components/Form'
+import _cloneDeep from 'lodash/cloneDeep'
 import _update from 'lodash/update'
 import _isEmpty from 'lodash/isEmpty'
 
@@ -17,21 +17,22 @@ const SelectInputSettings = ({ value = {}, onChange, disabled }) => {
   }, [])
 
   const handleChange = (path, fieldValue) => {
-    const newValue = { ...value }
+    const newValue = _cloneDeep(value)
     _update(newValue, path, () => fieldValue || null)
     onChange(newValue)
   }
 
   return pug`
     Card
-      Form.Item(label="Select options")
-        Select(
-          mode='tags' 
-          placeholder='Input options'
-          value=value.options
-          onChange=newValue=>handleChange('options', newValue)
-          disabled=disabled
-        )
+      FormItem(label="Select options")
+        ArrayInput(
+        items={
+          input: 'text'
+        } 
+        placeholder='Input options'
+        value=value.options
+        onChange=newValue=>handleChange('options', newValue)
+        disabled=disabled)
   `
 }
 
