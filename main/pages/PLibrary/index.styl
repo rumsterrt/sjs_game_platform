@@ -1,0 +1,40 @@
+.main
+  position relative
+  +tablet()
+      flex-direction row
+      flex-wrap wrap
+.card
+  height 31u
+  display flex
+  align-items center
+  justify-content center
+  margin-top 2u
+  +tablet()
+    margin-right 2u
+    width 31u
+
+.plusIcon
+  width 120px
+  height 120px
+
+.title
+  font-size 2u
+  font-weight bold
+  margin-bottom 2u
+
+.cardItem
+  margin-bottom 2u
+  &.last
+    margin-bottom 0
+
+.deleteButton
+    position absolute
+    top 1u
+    right 1u
+
+.fileUpload
+  border 1px solid #ccc
+  display inline-block
+  padding 1u
+  cursor pointer
+

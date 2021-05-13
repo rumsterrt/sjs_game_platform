@@ -1,46 +1,64 @@
 import React from 'react'
-import { observer, emit, useValue, useLocal } from 'startupjs'
 import './index.styl'
-import { Row, Div, Layout, SmartSidebar, Menu, Button, H1 } from '@startupjs/ui'
-import { faBars } from '@fortawesome/free-solid-svg-icons'
-import APP from '../../app.json'
+import { Platform, SafeAreaView, View, ScrollView } from 'react-native'
+import { observer, useLocal, emit } from 'startupjs'
+import { Content, Portal } from '@startupjs/ui'
+import { Loader, Modal, Notification, Logo } from 'components'
+import { withRouter } from 'react-router-native'
 
-const { displayName } = APP
+import Topbar from './Topbar'
+import Sidebar from './Sidebar'
 
-const APP_NAME = displayName.charAt(0).toUpperCase() + displayName.slice(1)
+export default withRouter(
+  observer(function ({ children, location }) {
+    const [{ user }] = useLocal('_session')
 
-const MenuItem = observer(({ url, children }) => {
-  const [currentUrl] = useLocal('$render.url')
-  return pug`
-    Menu.Item(
-      active=currentUrl === url
-      onPress=() => emit('url', url)
-    )= children
-  `
-})
+    if (!user) {
+      if (location.pathname.match(/auth\/.+/)) {
+        return pug`
+          Portal.Provider
+            View.authRoot
+              Logo
+              = children
+        `
+      }
+      emit('url', '/auth/sign-in')
+      return null
+    }
 
-export default observer(function ({ children }) {
-  const [opened, $opened] = useValue(false)
-
-  function renderSidebar () {
-    return pug`
-      Menu.sidebar
-        MenuItem(url='/') App
-        MenuItem(url='/about') About
+    const main = pug`
+      Portal.Provider
+        View.layout
+          Modal.Portal
+          Notification.Portal
+          Loader
+          Topbar
+          View.contentWrapper
+            Sidebar.sidebar
+              Content(
+                padding
+                width='full'
+                style={ backgroundColor: 'white', height: '100%', overflowY: 'scroll'}
+              )
+                Main.content= children
     `
-  }
+    return main
+  })
+)
 
+const Main = observer(({ children, style }) => {
   return pug`
-    Layout
-      SmartSidebar(
-        backgroundColor='#eeeeee'
-        path=$opened.path()
-        renderContent=renderSidebar
-      )
-        Row.menu
-          Button(color='secondaryText' icon=faBars onPress=() => $opened.set(!opened))
-          H1.logo= APP_NAME
-
-        Div.body= children
+    Wrapper
+      ScrollView(style=style)
+        = children
   `
 })
+
+const Wrapper =
+  Platform.OS === 'web'
+    ? React.memo(({ children }) => children)
+    : React.memo(
+      ({ children }) => pug`
+        SafeAreaView.page(style={ flex: 1, backgroundColor: '#fff' })= children
+  `
+    )

@@ -1,8 +1,18 @@
 $menuHeight = 6u
 $logoColor = #FCB69D
 
-.sidebar
-  padding-top 2u
+.layout
+  background white
+  width 100%
+  height 100%
+
+.contentWrapper
+  height 100%
+  display flex
+  width 100%
+
+.content
+  margin-bottom: 8u
 
 .menu
   background-color rgba(black, 0.02)
@@ -20,3 +30,12 @@ $logoColor = #FCB69D
 
 .body
   flex 1
+
+.authRoot
+  margin auto
+  background white
+  padding 2u
+  width 100%
+  +tablet()
+    padding 4u
+    width 50u

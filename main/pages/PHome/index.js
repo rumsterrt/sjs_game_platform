@@ -1,14 +1,14 @@
 import React from 'react'
-import { observer } from 'startupjs'
-import { ScrollView } from 'react-native'
-import { TestComponent } from 'components'
+import { observer, useSession } from 'startupjs'
 import './index.styl'
-import { Content } from '@startupjs/ui'
 
-export default observer(function PHome () {
-  return pug`
-    ScrollView.root
-      Content
-        TestComponent
-  `
-})
+import Player from './player'
+import Teacher from './teacher'
+
+const PHome = () => {
+  const [user] = useSession('user')
+
+  return user.isTeacher ? pug`Teacher` : pug`Player`
+}
+
+export default observer(PHome)
