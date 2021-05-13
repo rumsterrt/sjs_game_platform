@@ -4,6 +4,7 @@ import { observer, useQuery, model, useSession, useDoc } from 'startupjs'
 import QuestionsInput from './components/QuestionsInput'
 import { Notification } from 'components'
 import { FormItem, Form, Input, Checkbox, InputNumber, ArrayInput, useForm } from 'components/Form'
+import _template from 'lodash/template'
 
 import './index.styl'
 
@@ -25,9 +26,35 @@ const TemplateForm = ({ templateId, onSubmit }) => {
     setLocalValues(template || defaultInit)
   }, [JSON.stringify(template)])
 
+  const validateTemplate = (template) => {
+    try {
+      if (!template.scoreCalc.includes('return')) {
+        throw new Error('Need return statements inside calculate function ' + template.scoreCalc)
+      }
+      const compiled = _template(`(() => {${template.scoreCalc}})()`)
+      const args = template.roles.reduce((acc, item) => {
+        return { ...acc, [item[1]]: { response: [] } }
+      }, {})
+
+      return template.roles.every((role) => {
+        // eslint-disable-next-line no-eval
+        eval(compiled({ ...args, currentRole: `\`${role}\`` }))
+        return true
+      })
+    } catch (e) {
+      Notification.addNotify({
+        message: 'Incorrect calculation function: ' + e.message
+      })
+      return false
+    }
+  }
+
   const handleSubmit = () => {
     try {
       const values = form.validateFields()
+      if (!validateTemplate(values)) {
+        return
+      }
       if (templateId) {
         $templates.at(templateId).setEach({
           ...values
@@ -69,7 +96,7 @@ const TemplateForm = ({ templateId, onSubmit }) => {
         )
       FormItem(name='rounds' label="Rounds" rules=[{required: true }])
         InputNumber(min=1 placeholder='Enter number of rounds' type='number' disabled=isLocked)
-      FormItem(name='roles' label="Roles" rules=[{required: true, }])
+      FormItem(name='roles' label="Roles" rules=[{required: true}])
         ArrayInput(items={
           input: 'text'
         } placeholder='Input players roles' disabled=isLocked)
@@ -80,7 +107,7 @@ const TemplateForm = ({ templateId, onSubmit }) => {
           QuestionsInput(disabled=isLocked emptyByDefault common)
       FormItem(name='questions' label="Questions")
         QuestionsInput(disabled=isLocked roles=(localValues.roles || []).map(item => ({label: item, value: item})))
-      FormItem(name='scoreCalc' label="Score calculation template")
+      FormItem(name='scoreCalc' label="Score calculation template" rules=[{required: true}])
         Input(
           placeholder='Enter score rules'
           disabled=isLocked

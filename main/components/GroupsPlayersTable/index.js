@@ -44,7 +44,7 @@ const GroupsPlayersTable = ({ gameId, onlyUserGroup = false }) => {
       title: 'Name',
       key: 'name',
       render: (data) => pug`
-        Span.line.text #{data.firstName + ' ' + data.lastName}
+        Span.line.text #{data.name}
       `
     },
     {

@@ -11,10 +11,10 @@ import _debounce from 'lodash/debounce'
 const FormItem = observer(({ children, name, rules, label }) => {
   const [form] = usePage('form')
   const [value, setValue] = useState(name && form && form.getFieldValue(name))
-  const setFormValue = useMemo(() => _debounce((newValue) => form && form.setFieldValue(name, newValue), 300), [
-    name,
-    form && form.id
-  ])
+  const setFormValue = useMemo(
+    () => _debounce((newValue) => form && form.setFieldValue(name, newValue), 300),
+    [name, form && form.id]
+  )
 
   useEffect(() => {
     form && form._addFieldSettings(name, { rules })
@@ -27,12 +27,12 @@ const FormItem = observer(({ children, name, rules, label }) => {
   const extendChild =
     _isObject(children) && !_isArray(children) && name
       ? React.cloneElement(children, {
-          value,
-          onChange: (newValue) => {
-            setValue(newValue)
-            setFormValue(newValue)
-          }
-        })
+        value,
+        onChange: (newValue) => {
+          setValue(newValue)
+          setFormValue(newValue)
+        }
+      })
       : children
 
   const error = form && form.getFieldError(name)
